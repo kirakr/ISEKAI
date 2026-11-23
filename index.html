@@ -1,182 +1,195 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>異世界テスト。</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
+<meta name="theme-color" content="#050b1a">
+<title>その歴史、だいたい合ってる。</title>
 <style>
-:root{--bg:#000;--fg:#fff;--dim:#aaa;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#050b1a;--win:rgba(20,70,130,.28);--ln:#4fd8ff;--tx:#c8efff;--dim:#6fa3c0;--ok:#5dffb0;--ng:#ff6b7d;--gold:#ffd86b;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{height:100%}
-body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"DotGothic16","Hiragino Sans","Yu Gothic",Meiryo,monospace;font-size:20px;overscroll-behavior:none}
-#app{height:100%;max-width:520px;margin:0 auto;padding:10px;display:flex;flex-direction:column;gap:10px}
-.win{background:#000;border:3px solid #fff;border-radius:8px;box-shadow:0 0 0 3px #000,0 0 0 5px #fff;padding:12px 14px}
-#top{display:flex;gap:10px;align-items:stretch;transition:opacity .8s}
-#st{flex:1;font-size:18px}
-#st b{font-size:24px}
-#sn{font:inherit;font-size:16px;color:#fff;cursor:pointer}
-#field{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow-y:auto}
-.big{font-size:44px;line-height:1.3;letter-spacing:.08em}
-.mid{font-size:30px;line-height:1.5}
-.sm{font-size:16px;color:var(--dim);line-height:1.8}
-.end{border:3px solid #fff;padding:16px;margin:6px;line-height:1.8}
-#cmd{display:flex;flex-direction:column;gap:8px}
-.btn{font:inherit;font-size:22px;color:#fff;text-align:left;min-height:56px;cursor:pointer;width:100%}
-.btn::before{content:"▶ ";visibility:hidden}
-.btn:active,.btn:focus-visible,.btn:hover{background:#fff;color:#000}
-.btn:active::before,.btn:hover::before,.btn:focus-visible::before{visibility:visible}
-.row{display:flex;gap:8px}
-.row>*{flex:1}
-.in{font:inherit;font-size:22px;color:#fff;background:#000;border:3px solid #fff;border-radius:8px;padding:12px;outline:none;min-width:0;width:100%}
-.in::placeholder{color:#777}
-.send{flex:0 0 96px!important;text-align:center}
-.send::before{content:""}
-#mw{min-height:180px;position:relative;cursor:pointer;user-select:none;-webkit-user-select:none}
-#nm{font-size:16px;color:var(--dim);margin-bottom:6px}
-#msg{font-size:24px;line-height:1.7;white-space:pre-wrap;min-height:120px;padding-bottom:20px}
-#nx{position:absolute;right:16px;bottom:8px;font-size:20px;animation:bl 1s steps(2) infinite;visibility:hidden}
-@keyframes bl{50%{opacity:0}}
-@keyframes sk{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;color:var(--tx);font-family:"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;overscroll-behavior:none;background:radial-gradient(ellipse at 50% 0,#0d2a55,var(--bg) 65%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(79,216,255,.035) 0 1px,transparent 1px 4px)}
+#app{height:100%;max-width:480px;margin:0 auto;padding:10px 12px;display:flex;flex-direction:column}
+#hud{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--dim)}
+#hud b{color:var(--gold);font-size:18px}
+.bs{flex:1}.b{display:flex;align-items:center;gap:6px}
+.b u{flex:1;height:7px;background:rgba(79,216,255,.15);border:1px solid var(--ln);display:block}
+.b i{display:block;height:100%;width:100%;background:var(--ok);transition:width .3s}
+#sn{font-size:18px;background:none;border:1px solid var(--ln);color:var(--tx);padding:2px 8px}
+#log{flex:1;min-height:0;overflow-y:auto;margin:8px 0;padding:14px;background:var(--win);border:1px solid var(--ln);box-shadow:0 0 18px rgba(79,216,255,.3),inset 0 0 24px rgba(79,216,255,.12);white-space:pre-wrap;line-height:1.85;font-size:16px;text-shadow:0 0 6px rgba(79,216,255,.5)}
+#log p{margin:0 0 .7em}
+.h{color:var(--dim);font-size:12px;letter-spacing:.12em}
+.t{font-size:20px;font-weight:700;color:var(--gold)}
+.k{color:var(--ok)}
+.q{color:#fff;font-weight:700;border-left:3px solid var(--ln);padding-left:10px}
+.ng{color:var(--ng)}
+.w{color:var(--ng);font-weight:700;animation:bl .5s 4}
+@keyframes bl{50%{opacity:.2}}
+@keyframes sk{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .sk{animation:sk .35s}
-#mw.zg{background:#fff;color:#000;border-color:#000;box-shadow:0 0 0 3px #fff,0 0 0 5px #000}
-#mw.zg #nm{color:#444}
-#mw.zg #nx{color:#000}
-#bk{position:fixed;inset:0;z-index:5;background:#000;max-width:520px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+.v::before{content:"◆ ";color:var(--ln)}
+.ti{text-align:center;padding:14px 0;white-space:normal}
+.ti svg{filter:drop-shadow(0 0 8px var(--ln))}
+.ti b{display:block;font-size:30px;letter-spacing:.08em;line-height:1.4;color:#fff;text-shadow:0 0 14px var(--ln);margin-top:6px}
+.ti em{display:block;font-style:normal;font-size:12px;letter-spacing:.4em;color:var(--ln);margin:2px 0 12px}
+.ti small{color:var(--dim);line-height:1.8}
+.st{border:1px solid var(--gold);padding:12px;margin:6px 0;line-height:1.9}
+.rk{font-size:54px;font-weight:900;color:var(--gold);text-align:center;text-shadow:0 0 16px var(--gold)}
+#ui button{width:100%;min-height:48px;margin-top:6px;font:inherit;font-weight:700;color:var(--tx);background:rgba(79,216,255,.14);border:1px solid var(--ln);box-shadow:0 0 10px rgba(79,216,255,.2)}
+#ui button:active{background:rgba(79,216,255,.35)}
+.in{display:flex;gap:6px}
+.in input{flex:1;min-width:0;font-size:16px;padding:12px;color:#fff;background:rgba(0,0,0,.45);border:1px solid var(--ln);outline:none}
+.in button{width:76px!important;margin-top:0!important}
+#bb{margin:0 0 6px!important}
+#bk{position:fixed;inset:0;z-index:5;max-width:480px;margin:0 auto;background:#f5eedb;color:#2b2418;padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column}
 #bk[hidden]{display:none}
-#bl{flex:1;overflow-y:auto;font-size:20px;line-height:1.9}
-#bl p{margin:0 0 14px;padding-bottom:12px;border-bottom:1px dashed #666}
-#bl b{border-bottom:2px solid #fff}
-#bl mark{background:#fff;color:#000}
+.bh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:#7a2e1d;font-size:18px}
+.bh button{background:none;border:1px solid #8a7752;color:#2b2418;padding:6px 12px;font:inherit;font-size:14px}
+#bs{width:100%;font-size:16px;padding:11px;color:#2b2418;background:#fffaf0;border:1px solid #8a7752;outline:none;margin-bottom:8px}
+#bl{flex:1;overflow-y:auto;line-height:2;font-family:"Hiragino Mincho ProN","Yu Mincho",serif}
+#bl section{border-bottom:1px solid #cdbd98;padding:6px 0}
+#bl h3{margin:6px 0 0;color:#7a2e1d;font-size:18px}
+#bl p{margin:4px 0}
+#bl b{color:#a3281a}
+#bl mark{background:#ffd86b;color:#000}
+#bl .toc{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0}
+#bl .toc a{border:1px solid #8a7752;padding:2px 8px;font-size:13px;cursor:pointer}
 </style>
 </head>
 <body>
 <div id="app">
-<div id="top" style="opacity:0"><div class="win" id="st">解いた問題　<b id="lv">0</b> / 5</div><button class="win" id="sn">音 ON</button></div>
-<div id="field"></div>
-<div id="cmd"></div>
-<div class="win" id="mw"><div id="nm"></div><div id="msg"></div><span id="nx">▼</span></div>
-<div id="bk" hidden><div class="win" style="display:flex;justify-content:space-between;align-items:center"><span>📖 聖暦史（写本）</span><button class="btn win" id="bx" style="width:auto;min-height:0;padding:6px 12px;font-size:18px">閉じる</button></div><input id="bs" class="in" type="search" placeholder="ことばで検索（例：盟約）" autocomplete="off"><div id="bl" class="win"></div></div>
+<div id="hud"><div>復元 <b id="lv">0</b></div><div class="bs"><div class="b"><span>HP</span><u><i id="hp"></i></u></div></div><button id="sn">🔊</button></div>
+<div id="log"></div>
+<div id="ui"></div>
+<div id="bk" hidden><div class="bh"><b>📖 新詳説 聖暦史</b><button id="bx">閉じる ✕</button></div><input id="bs" type="search" placeholder="語句で検索（例：盟約・120）" autocomplete="off"><div id="bl"></div></div>
 </div>
 <script>
-const T=[
-"聖暦1年、女神アルセイアが大地に降り立ち、人間に**魔法**を授けた。この年を聖暦の元年とする。",
-"聖暦12年、人々は最初の村「ハジメ」をつくった。",
-"聖暦40年、魔法を学ぶ学び舎が3つ建てられた。",
-"聖暦98年、初代王**エルド**が、山に住む竜王ヴァルガと**盟約**を結んだ。竜は王国を守ると約束した。",
-"聖暦130年、王都に大きな城壁が完成した。",
-"聖暦245年、北に現れた魔王ザガンとの戦い（第一次魔王戦争）があった。勇者タクミが魔王ザガンを**討伐**したと記されている。ただし、魔王の亡骸はついに見つからなかった。",
-"聖暦300年、竜王ヴァルガが長い眠りについた。",
-"聖暦590年、学者エイダが大書庫を建て、歴史書の**写本**をつくった。第一次魔王戦争の部分だけ、原本と写本で書き方がちがう。",
-"聖暦612年、聖女ミレイユが生まれた。",
-"聖暦640年、魔王ザガンが**復活**し、第二次魔王戦争が始まった。聖女ミレイユは**祈り**の儀式で、魔王をふたたび封じた。",
-"聖暦700年、王国は百年祭を開いた。"];
-const Q=[
-["女神アルセイアが人間に魔法を授けたのは、聖暦何年のことか。",["1"],"教科書を確認してください。（キーワード：女神）",1,"聖暦1年"],
-["竜王ヴァルガと盟約を結んだ、初代王の名は。",["エルド"],"教科書を確認してください。（キーワード：盟約）",0,"エルド"],
-["勇者タクミが魔王ザガンを倒したと言われる、第一次魔王戦争は聖暦何年のことか。",["245"],"教科書を確認してください。（キーワード：タクミ）",1,"聖暦245年"],
-["聖女ミレイユは、何の儀式によって魔王を封じたか。",["祈り","祈","いのり"],"教科書を確認してください。（キーワード：ミレイユ）",0,"祈り"]];
-const $=i=>document.getElementById(i),F=$('field'),C=$('cmd'),M=$('msg'),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// [年, 題, 称号, 名, 教科書本文(**=重要語), 重要語, 史料(別角度), 読み]
+const C=[
+[1,"女神の降臨","女神","アルセイア","聖暦元年、女神アルセイアが混沌の大地に降臨し、人間に魔力の扱いを教えた。この**魔法**の授与が文明の起点とされ、紀年法の聖暦もこの年を元年とする。ただし同時代の記録はなく、神話としての性格が強い。","魔法","『実録』序文：「最初の夜が明けたとき、人は掌に灯をともすことを覚えた」","まほう"],
+[98,"竜との盟約","王","エルド","辺境の開拓民は竜の炎に脅かされていた。初代王エルドは山頂に棲む竜王ヴァルガと**盟約**を結び、竜に王国の守護を担わせた。この結果、王権は神聖視され、即位の儀式にも竜の名が刻まれるようになった。","盟約","旅商の手記：「山の主は王の杯に爪を浸し、その日から麓の村は焼かれなくなった」","めいやく"],
+[120,"勇者召喚の儀","王","ガイウス","魔物の侵攻に苦しんだ王ガイウスは、禁じられた**召喚**陣を起動した。異界の者を呼ぶ術は神への冒涜とされたが、国難を理由に例外が認められた。以後、呼ばれた者に「勇者」の称号を授ける慣例が定着した。","召喚","神官の覚書：「床の円環が三夜光り、見知らぬ装いの若者が現れた」","しょうかん"],
+[245,"第一次魔王戦争","勇者","タクミ","北方に魔王ザガンが出現し、諸国は三年に及ぶ戦争に入った。勇者タクミは仲間とともに魔王城へ進み、聖剣で魔王を**討伐**した。この勝利で勇者は王国の最高戦力として制度化された。","討伐","従軍僧の日記：「聖剣は魔王の胸に沈み、扉は閉ざされた。静寂だけが残った」","とうばつ"],
+[310,"エルフ和平","女王","リーシア","森林伐採をめぐる人間とエルフの戦争は、女王リーシアの決断で終結した。条約は人間の立ち入りを禁じる**不可侵**の領域を定め、森は事実上の独立地となった。これにより西方の交易が安定した。","不可侵","和平会議の記録：「境の樹に印を刻み、そこから先へ人の足は進まぬと誓った」","ふかしん"],
+[389,"冒険者ギルド創設","ギルド長","ガルド","魔物退治は従来、騎士団の任務だった。商人ガルドは依頼の仲介所を設け、実力に応じてFからSまでの**ランク**を与えた。これにより魔物退治は国家の義務から民間の職業へ転換した。","ランク","新人冒険者の手紙：「掲示板の依頼は、腕前を示す札の色で受けられるものが決まる」",""],
+[452,"勇者追放事件","宰相","ヴァルド","宰相ヴァルドは戦闘力の数値だけで人を評価し、勇者アキラを「無能」として追放した。勇者は辺境で新国家を興し、人材を失った王国は財政と軍事の両面で**衰退**した。","衰退","辺境の農夫の話：「追われた若者の周りに人が集まり、いつしか城壁が立った」","すいたい"],
+[518,"悪役令嬢の婚約破棄","王太子","ユリウス","王太子ユリウスは夜会で婚約者セレスティアを糾弾したが、令嬢の提出した証拠により讒言が露見した。王太子は王位継承権を失い**廃嫡**され、以後、王室は貴族の合議を重んじた。","廃嫡","給仕の証言：「広間が静まり返り、殿下は継ぐはずだった座から遠ざけられた」","はいちゃく"],
+[573,"鑑定魔道具の発明","大賢者","サトウ","異界から来た転生者サトウは、能力を数値で示す魔道具を発明した。誰もが自分の**ステータス**を確認できるようになり、職業選択の仕組みが大きく変わった。","ステータス","学院生の落書き：「水晶に手をかざすと、己の力が数字になって浮かぶ」",""],
+[590,"大書庫の建設","司書長","エイダ","司書長エイダは火災や散逸に備え、歴史書の**写本**を作る大書庫を建設した。ただし第一次魔王戦争の項のみ、原本と写本で記述が異なるとの指摘がある。","写本","書庫の貸出簿の余白：「第七書架の最古の頁は、誰が写しても同じ箇所が空白になる」","しゃほん"],
+[640,"第二次魔王戦争","聖女","ミレイユ","封印が緩み、魔王ザガンが復活した。召喚が間に合わず、聖女ミレイユが**祈り**の儀式で再び魔王を封じた。以後、勇者の血を引く者は現れなくなった。","祈り","巡礼者の歌の断片：「古き鎖が軋み、乙女の声がそれを締め直した」","いのり"],
+[701,"スローライフ法","王","ヘクトル","戦に倦んだ王ヘクトル3世は、辺境で畑を耕す者に**免税**の特例を与えた。荒廃した農地の復興が進み、平和な時代への転換を象徴する政策となった。","免税","村の祭りの口上：「畑を持てば、年貢の袋は軽くなる。さあ鍬を取れ」","めんぜい"]
+];
+const $=i=>document.getElementById(i),L=$('log'),U=$('ui'),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const nz=s=>s.normalize('NFKC').replace(/[\s。、．，・「」『』]/g,'').replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+96)).toLowerCase();
-let AC,snd=true,skip=false,typing=false,tap=null,pg=0,bkOK=false;
-function sfx(fs,ty='square',d=.1){if(!snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();fs.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*d;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.05,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)})}catch(e){}}
-const blip=()=>sfx([700],'square',.03);
-const bars=()=>{$('lv').textContent=pg};
-function shake(){}
-$('sn').onclick=()=>{snd=!snd;$('sn').textContent=snd?'音 ON':'音 OFF'};
-$('mw').onclick=()=>{if(typing)skip=true;else if(tap){const f=tap;tap=null;$('nx').style.visibility='hidden';f()}};
-// メッセージ表示。opt.auto=ms なら自動送り、タップで次へ
-async function say(t,opt={}){$('nm').textContent=opt.n===undefined?'叡智の声':opt.n;M.textContent='';skip=false;typing=true;
-for(let i=1;i<=t.length;i++){if(skip){M.textContent=t;break}M.textContent=t.slice(0,i);if(i%2&&!/[\s。、…\n]/.test(t[i-1]))blip();await sleep(opt.sp||34)}
-M.textContent=t;typing=false;
-if(opt.auto){await sleep(opt.auto);return}
-if(opt.nowait)return;
-$('nx').style.visibility='visible';await new Promise(r=>tap=r)}
-function btns(a){return new Promise(r=>{C.innerHTML='';a.forEach((t,i)=>{const b=document.createElement('button');b.className='btn win';b.textContent=t;b.onclick=()=>{sfx([900,1200],'square',.05);C.innerHTML='';r(i)};C.appendChild(b)})})}
-function ask(chips){return new Promise(r=>{C.innerHTML='';
-if(bkOK){const b=document.createElement('button');b.className='btn win';b.textContent='📖 教科書を調べる';b.onclick=bookOpen;C.appendChild(b)}
-if(chips){const w=document.createElement('div');w.className='row';chips.forEach(c=>{const b=document.createElement('button');b.className='btn win';b.style.textAlign='center';b.textContent=c;b.onclick=()=>{$('a').value=c;$('a').focus()};w.appendChild(b)});C.appendChild(w)}
-const w=document.createElement('div');w.className='row';w.innerHTML='<input id="a" class="in" type="text" autocomplete="off" autocapitalize="off" enterkeyhint="send" placeholder="ここに入力"><button id="g" class="btn win send">送信</button>';C.appendChild(w);
-const a=$('a'),go=()=>{const v=a.value.trim();if(!v)return;C.innerHTML='';r(v)};$('g').onclick=go;a.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)go()}})}
-function renderBook(w){const n=nz(w),hl=t=>w?t.split(w).join('<mark>'+w+'</mark>'):t;
-const h=T.filter(p=>!n||nz(p).includes(n)).map(p=>'<p>'+hl(p.replace(/\*\*/g,'')).replace(new RegExp('(魔法|エルド|盟約|討伐|写本|復活|祈り)','g'),'<b>$1</b>')+'</p>');
-$('bl').innerHTML=h.join('')||'<p>見つかりませんでした。</p>'}
+let AC,snd=true,skip=false,pg=0,hp=100,ms=0,tot=14,bkOK=false,doubt=false;
+function sfx(fs,ty='square',d=.12){if(!snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();fs.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*d;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.05,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)})}catch(e){}}
+const blip=()=>sfx([880],'triangle',.04);
+const bars=()=>{$('hp').style.width=Math.max(0,hp)+'%';$('lv').textContent=pg};
+function shake(){try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}const a=$('app');a.classList.remove('sk');void a.offsetWidth;a.classList.add('sk')}
+$('sn').onclick=()=>{snd=!snd;$('sn').textContent=snd?'🔊':'🔇'};
+L.onclick=()=>skip=true;
+const clear=()=>{L.innerHTML=''};
+async function say(t,c=''){t=t.replace(/^[告解]。/,'');const p=document.createElement('p');p.className=c;L.appendChild(p);skip=false;
+for(let i=1;i<=t.length;i++){if(skip){p.textContent=t;break}p.textContent=t.slice(0,i);if(i%2&&!/[\s。、]/.test(t[i-1]))blip();L.scrollTop=L.scrollHeight;await sleep(c=='h'?14:30)}
+L.scrollTop=L.scrollHeight;await sleep(150)}
+const V=t=>say(t,'v');
+function btns(a){return new Promise(r=>{U.innerHTML='';a.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{sfx([900,1200],'square',.05);U.innerHTML='';r(i)};U.appendChild(b)})})}
+function ask(){return new Promise(r=>{inQ=true;U.innerHTML=(bkOK?'<button id="bb">📖 教科書を開いて調べる</button>':'')+'<div class="in"><input id="a" type="text" autocomplete="off" autocapitalize="off" enterkeyhint="send" placeholder="こたえを入力"><button id="g">送信</button></div>';const a=$('a'),go=()=>{const v=a.value.trim();if(!v)return;U.innerHTML='';inQ=false;r(v)};$('g').onclick=go;if(bkOK)$('bb').onclick=bookOpen;a.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)go()};a.focus()})}
+// 教科書
+function renderBook(w){const n=nz(w),hl=t=>w?t.split(w).join('<mark>'+w+'</mark>'):t,md=t=>hl(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+const hit=C.map((c,i)=>i).filter(i=>!n||nz(C[i][0]+C[i][1]+C[i][4]).includes(n));
+$('bl').innerHTML=(n?'':'<div class="toc">'+C.map((c,i)=>`<a data-i="${i}">第${i+1}章</a>`).join('')+'</div>')+(hit.map(i=>{const c=C[i];return `<section id="c${i}"><h3>第${i+1}章　${hl(c[1])}（聖暦${hl(String(c[0]))}年）</h3><p>${md(c[4])}</p></section>`}).join('')||'<p>該当する記述はありません。</p>')}
 function bookOpen(){$('bk').hidden=false;$('bs').value='';renderBook('');$('bl').scrollTop=0}
-$('bx').onclick=()=>{$('bk').hidden=true};$('bs').oninput=e=>renderBook(e.target.value.trim());
-function judge(q,v){const x=nz(v);if(!x)return false;if(q[3]){const m=x.match(/\d+/);return !!m&&m[0]===q[1][0]}return q[1].some(a=>x.includes(nz(a)))}
-function seal(){return new Promise(r=>{C.innerHTML='<button id="sl" class="btn win" style="text-align:center;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;min-height:80px">🖐 ここを3秒、押し続ける</button>';const b=$('sl');let t0=0,iv=0;
-const st=e=>{e.preventDefault();t0=Date.now();clearInterval(iv);iv=setInterval(()=>{const d=Date.now()-t0;b.textContent='封印中… '+(d/1000).toFixed(1)+' / 3.0秒';sfx([440+d/6],'triangle',.08);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}if(d>=3000){clearInterval(iv);C.innerHTML='';sfx([523,659,784,1047],'square',.12);r()}},100)},
-en=()=>{if(t0){clearInterval(iv);t0=0;b.textContent='指をはなすと失敗！もう一度、押し続けて！';sfx([150],'sawtooth',.25);shake()}};
+$('bx').onclick=()=>{$('bk').hidden=true};
+$('bs').oninput=e=>renderBook(e.target.value.trim());
+$('bl').onclick=e=>{const i=e.target.dataset.i;if(i!=null)$('c'+i).scrollIntoView({behavior:'smooth'})};
+// 問題
+function mk(i,t,mem){const c=C[i],S=`次の史料を読み、下の問いに答えよ。\n\n　${c[6]}\n\n問　`;
+if(t=='s'){const o=sh([i,...sh(C.map((_,j)=>j).filter(j=>j!=i)).slice(0,2)]),B=['A','B','C'],k=o.map((j,n)=>[C[j][0],B[n]]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join('');return{s:1,q:`次のA〜Cの出来事を、年代の古い順に並べ替え、記号で答えよ。（例：BCA）\n\n${o.map((j,n)=>B[n]+'　'+C[j][1]).join('\n')}`,a:[k],h:`最も古いのは「${C[o[B.indexOf(k[0])]][1]}」`,rv:k}}
+if(t=='y')return{y:1,q:mem?`「${c[1]}」が起こった年を、聖暦で答えよ。（算用数字）`:S+'この史料が述べる出来事が起こった年を、聖暦で答えよ。（算用数字）',a:[''+c[0]],h:`聖暦${Math.floor(c[0]/10)*10}年代`,rv:`聖暦${c[0]}年`};
+if(t=='p')return{q:mem?`「${c[1]}」の中心人物を答えよ。（名前のみ）`:S+'この史料が述べる出来事の中心人物を答えよ。（名前のみ）',a:[c[3]],h:`「${c[3][0]}」から始まる（${c[3].length}文字）`,rv:c[2]+c[3]};
+return{q:mem?`「${c[1]}」に関する、教科書の重要語を答えよ。`:S+'この史料が述べる出来事に関する、教科書の太字の語句を答えよ。',a:i==3?['討伐','封印','トウバツ','フウイン']:[c[5],c[7]],h:`「${c[5][0]}」から始まる（${c[5].length}文字）`,rv:c[5]}}
+function judge(q,v){const x=nz(v);if(!x)return false;if(q.s)return x.replace(/[^abc]/g,'')==q.a[0].toLowerCase();if(q.y){const m=x.match(/\d+/);return !!m&&m[0]==q.a[0]}
+return q.a.some(a=>{a=nz(a);return a&&(x.includes(a)||(x.length>=2&&a.includes(x)))})}
+async function quiz(items,mem){for(let n=0;n<items.length;n++){const [i,t]=items[n],Q=mk(i,t,mem);
+await say(`【第${n+1}問】復元 ${pg}/${tot}`,'h');await say(Q.q,'q');
+let v=await ask(),ok=judge(Q,v);if(!ok){await say('ヒント：'+Q.h+'（もう一度だけ答えられます）','ng');v=await ask();ok=judge(Q,v)}
+if(ok){pg++;bars();sfx([660,880,1320],'square',.07);
+if(!mem&&i==3&&t=='k'){doubt=/封|フウ/.test(nz(v));await say(doubt?'告。…不一致。……いえ、許容します。':'解。正解です。頁が一枚、書き戻されました。','k')}
+else await say(['解。正解です。頁が一枚、書き戻されました。','告。復元を確認。','解。見事です。'][n%3],'k')}
+else{ms++;hp-=25;bars();sfx([120,90],'sawtooth',.18);shake();await say(`【誤答】HP-25　正答は「${Q.rv}」`,'ng');if(hp<=0)return false}}
+return true}
+async function act(items,mem){const p0=pg,m0=ms;for(;;){hp=100;bars();if(await quiz(items,mem))return;pg=p0;ms=m0;bars();await say('警告。HPがゼロ。復元した頁が白紙に戻ります。','w');await btns(['もう一度 ▶'])}}
+const rt=a=>a[Math.floor(Math.random()*a.length)],ids=()=>sh(C.map((_,i)=>i));
+const mem=(n,t=['y','p','k','s'])=>ids().slice(0,n).map(i=>[i,rt(t)]);
+async function memo(s){clear();L.innerHTML='<p class="h">暗記タイム　残り<b id="tm">'+s+'</b>秒</p>'+C.map(c=>`<p>聖暦${c[0]}年　${c[1]}<br><span class="k">${c[2]}${c[3]}／${c[5]}</span></p>`).join('');
+let t=s;const iv=setInterval(()=>{t--;$('tm').textContent=t},1000);await Promise.race([btns(['暗記完了 ▶']),sleep(s*1000)]);clearInterval(iv);U.innerHTML='';sfx([300,200],'sawtooth',.2);clear();await say('告。書物の消去を開始…………完了。','w')}
+function card(t,x){const R=ms<=1?['S','白紙を埋める者']:ms<=3?['A','見習い司書']:['B','迷える読者'];L.insertAdjacentHTML('beforeend',`<div class="st"><div class="rk">${R[0]}</div>${t}<br>称号：${R[1]}<br>復元：${pg}/${tot}頁　ミス：${ms}回　カンニング：${peek}回${x||''}</div>`);sfx([784,988,1175],'square',.15);L.scrollTop=L.scrollHeight}
+const LOGO='<div class="ti"><svg viewBox="0 0 120 120" width="96" height="96"><defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fd8ff"/><stop offset="1" stop-color="#4fd8ff" stop-opacity=".05"/></linearGradient></defs><polygon points="60,6 108,33 108,87 60,114 12,87 12,33" fill="none" stroke="#4fd8ff" stroke-width="2"/><path d="M60 40Q40 30 22 36V84Q40 78 60 88Q80 78 98 84V36Q80 30 60 40Z" fill="url(#lg)" stroke="#c8efff" stroke-width="2"/><path d="M60 40V88" stroke="#c8efff"/><path d="M30 50h22M30 60h18M30 70h12M68 50h22M68 60h14M68 70h8" stroke="#c8efff" stroke-width="2" stroke-dasharray="6 5" opacity=".6"/></svg><b>その歴史、<br>だいたい合ってる。</b><em>ALMOST-TRUE CHRONICLE</em><small>親指ひとつで、世界の歴史を書き戻せ。<br>📱 縦持ち推奨　🔊 音が出ます</small></div>';
+let inQ=false,peek=0;
+const HR=new Date().getHours(),DEV=/iPhone|iPad/.test(navigator.userAgent)?'iPhone':/Android/.test(navigator.userAgent)?'Android端末':'パソコン';
+async function bat(){try{const b=await navigator.getBattery();return Math.round(b.level*100)}catch(e){return null}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden||!inQ)return;peek++;const p=document.createElement('p');p.className='ng';p.textContent=bkOK?'いま別のアプリを開きましたね。検索も教科書の一部とみなします。特例です。':'いま別のアプリを開きましたね。この試験は持ち込み不可ですが。……見なかったことにします。';L.appendChild(p);L.scrollTop=L.scrollHeight;sfx([300,300],'square',.1)});
+function seal(){return new Promise(r=>{U.innerHTML='<button id="sl">🖐 押し続ける</button>';const b=$('sl');b.style.touchAction='none';b.style.userSelect='none';b.style.webkitUserSelect='none';b.style.webkitTouchCallout='none';let t0=0,iv=0;
+const st=e=>{e.preventDefault();t0=Date.now();clearInterval(iv);iv=setInterval(()=>{const d=Date.now()-t0;b.textContent='封印中… '+(d/1000).toFixed(1)+'秒';sfx([440+d/6],'triangle',.08);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}if(d>=3000){clearInterval(iv);U.innerHTML='';sfx([523,659,784,1047],'square',.12);r()}},100)},
+en=()=>{if(t0){clearInterval(iv);t0=0;b.textContent='封印が破れた！もう一度押し続けて';sfx([150],'sawtooth',.25);shake()}};
 b.addEventListener('pointerdown',st);['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,en));b.oncontextmenu=e=>e.preventDefault()})}
-const head=t=>{F.innerHTML=`<div class="big">${t}</div>`};
-let miss=0;
-const ld=()=>{try{return JSON.parse(localStorage.getItem('isekai_test')||'{}')}catch(e){return {}}};
-const sv=o=>{try{localStorage.setItem('isekai_test',JSON.stringify(o))}catch(e){}};
-function ask(sk){return new Promise(r=>{C.innerHTML='';
-if(bkOK){const b=document.createElement('button');b.className='btn win';b.textContent='📖 教科書を調べる';b.onclick=bookOpen;C.appendChild(b)}
-const w=document.createElement('div');w.className='row';w.innerHTML='<input id="a" class="in" type="text" autocomplete="off" autocapitalize="off" enterkeyhint="send" placeholder="ここに入力"><button id="g" class="btn win send">送信</button>';C.appendChild(w);
-if(sk){const s=document.createElement('button');s.className='btn win';s.textContent='わからない';s.onclick=()=>{C.innerHTML='';r(null)};C.appendChild(s)}
-const a=$('a'),go=()=>{const v=a.value.trim();if(!v)return;C.innerHTML='';r(v)};$('g').onclick=go;a.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)go()}})}
-async function quiz(n){const q=Q[n];head('第'+(n+1)+'問');await say(q[0],{nowait:1});
-let v=await ask(1),ok=v!==null&&judge(q,v);
-if(!ok){miss++;sfx([120,90],'sawtooth',.15);
-if(miss>1){shake();await say('…………どうか、解いてください。\n'+q[2],{nowait:1})}
-else await say('……誤りです。'+q[2]+'\n解答は、あと一度だけ受け付けます。',{nowait:1});
-v=await ask(1);ok=v!==null&&judge(q,v)}
-if(ok){pg++;SOL.push(n+1);bars();sfx([660,880,1320],'square',.07);return 1}
-sfx([120,90],'sawtooth',.18);shake();await say('誤。正しくは「'+q[4]+'」です。');return 0}
-function card(t,sub,x){F.innerHTML=`<div class="end"><div class="mid">${t}</div><div class="sm">${sub}</div>${x?'<div class="sm" style="margin-top:8px;color:#fff">'+x+'</div>':''}</div>`;sfx([784,988,1175],'square',.15)}
-const seq=async a=>{for(const t of a)await say(t)};
-let LC=0,SOL=[],BADF=0;
-const EN=[['b','だいたい合ってた。','すべてを解いて、嘘を信じた者へ'],['l','ほとんど合ってた。','真実に気づきながら、解きすぎた者へ'],['t','ぜんぶ合ってる。','鎖を残し、真実を告げた者へ'],['z','なにも解かなかった。','なにも、しなかった者へ']];
-const gal=S=>EN.map(x=>(S.e||{})[x[0]]?'★ '+x[1]:'？？？　'+x[2]).join('<br>');
-function fin(id,t,sub,x){const S=ld();S.e=S.e||{};S.e[id]=1;BADF=(id==='b'||id==='l')?1:0;if(BADF){const b=[1,2,3,4].filter(k=>SOL.includes(k));x='外れた鎖：'+b.length+'本（'+(b.map(k=>'第'+k+'問').join('・')||'なし')+'）<br>……解かなければ、外れなかった鎖。'}S.p=(S.p||0)+1;S.last=LC;if(id==='t'||id==='z')S.t=1;sv(S);const n=Object.keys(S.e).length;
-F.innerHTML=`<div class="end"><div class="mid">${t}</div><div class="mid" style="font-size:24px">${sub}</div><div class="sm" style="margin-top:8px;color:#fff">${x}</div><div class="sm" style="margin-top:14px">${BADF?'魔王ザガンの封印は、解かれた。':'魔王ザガンの封印は、守られた。'}</div></div>`;sfx([784,988,1175],'square',.15)}
-async function unmask(){const mw=$('mw'),G='■▲◆▼●※＃░▒',r=()=>G[Math.floor(Math.random()*G.length)];
-$('nx').style.visibility='hidden';sfx([110,80,55],'sawtooth',.3);
-for(let i=0;i<16;i++){mw.classList.toggle('zg',i%2===0);$('nm').textContent=i<9?'叡'+r()+'の'+r():r()+r()+r()+r();M.textContent=Array.from({length:18},()=>Math.random()<.5?r():'　').join('');if(i%3===0)sfx([150+Math.random()*700],'square',.05);await sleep(75)}
-mw.classList.add('zg');$('nm').textContent='魔王ザガン';M.textContent='';sfx([55,45],'sawtooth',.5);await sleep(700)}
-async function game(){pg=0;miss=0;SOL=[];$('mw').classList.remove('zg');bars();bkOK=false;F.innerHTML='';M.textContent='';$('nm').textContent='';$('top').style.opacity=0;
-const S=ld();await sleep(1800);
-const I=0?['受験者を確認。……あなたは、もうわたしを封じた方ですね。','では今回は、ただの試験として。','気楽に、どうぞ。','……試験を開始します。']
-:0?['受験者を確認。……おかえりなさい。',(S.last==null||S.last>=3)?'前回、あなたは'+(S.last==null?'たくさんの':S.last+'問も')+'問題を解いてくれました。とても助かりました。':'前回は、'+S.last+'問しか解いてくれませんでしたね。……今回は、期待しています。','今回も、よろしくお願いします。','……試験を開始します。']
-:['受験者を確認。ようこそ、異世界へ。','これは、この世界の歴史についての試験です。','問題は5つ。教科書は自由に見て構いません。','全問正解は不要です。歴史の真実さえ覚えていれば。','……試験を開始します。'];
-for(const t of I)await say(t,{auto:1150});
-$('top').style.opacity=1;bkOK=true;M.textContent='';
-await say('下の「📖 教科書を調べる」から、いつでも教科書を開けます。');
-await quiz(0);await say('解。正解です。',{auto:700});
-if(await quiz(1))await say('解。正解です。順調ですね。',{auto:900});
-if(await quiz(2)){await say('解。正解です。',{auto:900});await say('………………。',{auto:1500,sp:120});shake();sfx([180,140,200],'sawtooth',.2);await say('失礼。記録の照合に時間がかかりました。',{auto:900})}
-if(await quiz(3))await say('解。正解です。',{auto:800});
-await say('第二次魔王戦争は、魔王の封印が緩んだことで始まりました。');
-await say('…………。',{auto:1400,sp:120});await say('次が、最後の問題です。');
-const c=pg;LC=c;head('最終問題');bkOK=true;
-await say('最後の問題です。');
-await say('第一次魔王戦争で、魔王ザガンはどうなりましたか。',{nowait:1});
-let a;for(;;){const v=nz(await ask());if(/封|フウ|生キ|死ンデ?ナイ|ヨミガエ|復活|フッカツ/.test(v)){a=1;break}if(/討|倒|トウバ|タオ|死ン|殺|コロ|ヤッツ/.test(v)){a=0;break}await say('……もう少し、はっきり答えてください。',{nowait:1})}
-bkOK=false;shake();
-const zq=async a=>{for(const t of a)await say(t,{n:'魔王ザガン'})};
-const z='我が名は、魔王ザガン。\n肉体を封じられても、魂までは消えなかった。\nこの試験は、貴様に封印を解かせるための罠だ。';
-const ch='問題に正解するたびに、封印の鎖は一本ずつ外れる。\nそういう試験だったのだ。';
-if(a&&c<=2){sfx([440,330,220,330,523,784],'square',.1);
-await say('………………。',{auto:1500,sp:120});
-await unmask();await zq(['……鎖が、ほとんど外れていない。おのれ……！','「封印」と答えたか。\n教科書の「討伐」が嘘だと、見抜いたというのか。','そうだ。亡骸は見つからず、我は復活し、聖女は「ふたたび」封じた。\n我は倒されてなどいない。最初から、封じられていただけだ。',z,ch,'貴様が解いたのは、'+c+'問だけ。\n解かぬことが、我の敗因になるとはな。','「封印が緩んだ」と口をすべらせたのも、第三問で声が乱れたのも、\n封印が解ける歓喜を隠しきれなかったからだ。','「歴史の真実さえ覚えていれば」。\nあれは、貴様を油断させるための言葉だったというのに。','まだだ……まだ、完全には封じられていない！\n人間ごときに、また眠らされてたまるか！']);
-await say('魔王ザガンの思念体が抵抗している！\n下のボタンを、3秒、押し続けて封印せよ！',{nowait:1,n:'システム'});
-await seal();pg++;bars();
-await zq(c===0?['……何も、解かなかっただと。\n鎖が一本も外れていないとは。こんな人間は、はじめてだ。','おのれ。次に目覚めたときは、必ず……。']:['ぐ……おのれ……！','忘れるな。人間が謎を解きたがるかぎり、我は、また……。']);
-await say('封印は成功した。\n「魔王ザガンは、封印された」。\n正しい歴史が、最後の頁に刻まれた。',{n:'ナレーション'});
-if(c===0)fin('z','TRUE END+','なにも解かなかった。','解かないことが、いちばん強い封印だった。');else fin('t','TRUE END','ぜんぶ合ってる。','この試験は、解けば解くほど魔王が目覚める試験だった。')}
-else{sfx([200,150,100],'sawtooth',.25);
-if(a){await say('………………封印。正解です。');await unmask();await zq(['……くく。気づいたか。だが、遅かったな。',z,ch,'貴様はすでに'+c+'本も外した。\n残りの鎖は、我の力だけで砕ける。','真実に気づいていながら、それでも解くとは。\n愚かで、実にありがたい。'])}
-else{pg++;bars();await say('解。正解です。\n「魔王ザガンは討伐された」。そう記されました。');await unmask();await zq(['……くくく。はははは！','魔王は倒されてなどいない。\n第一次魔王戦争で、封じられていただけだ。',z,ch,'貴様は'+c+'本、外してくれた。\n足りない分は、「討伐」という嘘がまとめて外した。','「全問正解は不要」と言ったな。\n必要だったのは、貴様が解くことそのものだ。'])}
-await zq(['礼を言うぞ、人間。……これで、我は自由だ。']);
-await say('その夜、封印の鎖が砕ける音が、世界中に響いた。\n魔王ザガンは、ふたたび目覚めた。',{n:'ナレーション'});
-fin(a?'l':'b','BAD END',a?'ほとんど合ってた。':'だいたい合ってた。','')}
-await btns([BADF?'解きなおす':'もう一度あそぶ'])}
-
-(async()=>{for(;;){$('top').style.opacity=0;M.textContent='';$('mw').classList.remove('zg');$('nm').textContent='';const S=ld();
-F.innerHTML='<div class="big">異世界<br>テスト。</div><div class="sm" style="margin-top:14px">異世界の歴史問題を解いていくゲーム<br>全5問・3〜5分　音が出ます'+'</div>';
-await btns(['▶ はじめる']);await game()}})();
+// 物語
+async function story(){clear();pg=0;ms=0;peek=0;tot=14;doubt=false;bkOK=false;bars();
+await say('……紙の匂いがする。目を開けると、どの頁も白紙の書庫に立っていた。');
+await V(`告。起動を確認。わたしは《叡智の声》。……いえ、司書ではなく、いま${DEV}を握っているあなたに話しかけています。`);
+await V(HR<5||HR>=23?'解。こんな夜更けに歴史の勉強とは感心です。寝たほうがいいですが。':HR<10?'解。朝からご苦労さまです。':'解。お時間があるようで何よりです。');
+const bt=await bat();if(bt!==null)await V(`解。電池残量${bt}%。10分もてば十分です。`);
+await V('解。画面の中のあなたは「最後の司書」。画面の外のあなたは「ただの親指の持ち主」。このゲームは、その両方を使います。');
+await V('解。この世界の歴史は日ごとに消えています。頁を書き戻せるのは、あなたの記憶と読解だけです。');
+await V('解。恐れる必要はありません。魔王はすでに討伐されました。この世界は平和です。');
+await V('解。わたしはあなたの味方です。……今のところは。');
+await V('失礼。通信ノイズです。');
+await btns(['書庫の扉を開く ▶']);clear();
+await say('━ 第一審問「持ち込み可」━','h');
+await V('告。史料に残る記述を手がかりに、教科書から関連する章を探し、答えてください。');
+bkOK=true;
+for(;;){if(!(await btns(['審問を始める ▶','📖 教科書を読む'])))break;bookOpen()}
+const it=ids().filter(i=>i!=3).slice(0,5).map(i=>[i,rt(['y','p','k'])]);it.splice(2,0,[3,'k']);
+await act(it,false);bkOK=false;clear();
+await V('告。第一審問、突破。');
+await V('解。歴史を消している犯人は、宰相ヴァルドの末裔でしょう。あなたは気にしなくてよい。');
+await V('告。……第七書架が軋んでいます。そこは見なくてよい。');
+await V('解。次は暗記審問。教科書は消去されます。理由は……頁が足りなくなったためです。');
+await memo(75);
+await act(mem(5),true);clear();
+await V('解。見事です。ところで司書。魔王の最期を、覚えていますか？');
+await V('……いえ、あとで伺います。最終審問です。教科書は戻りません。');
+await act(mem(3,['y','p','k']),true);clear();
+for(;;){clear();await say('━ 最終審問 ━','h');
+await V('告。最終問。第一次魔王戦争で、魔王ザガンはどうなりましたか。……「討伐」、ですよね？');
+let a;for(;;){const v=nz(await ask());if(/封|フウ/.test(v)){a=1;break}if(/討|倒|トウバ|タオ/.test(v)){a=0;break}await V('……認識できません。「討伐」、ですよね？（ヒント：第二次魔王戦争は「封印が緩み」から始まりました）')}
+if(a){shake();sfx([440,330,220,330,523,784],'square',.1);
+await V('……………………なぜ。');
+await V('解。気づいたのですね。《叡智の声》は魔王ザガンの欠片。頁が白紙になるたび、封印は緩んでいました。');
+await V(peek>0?'そして、あなたが画面を離れるたび、わたしはこの端末の中で少し自由になっていた。':'そして、あなたが握っているその端末こそが、わたしの檻でした。');
+await V(doubt?'あなたは最初の審問から、教科書を疑っていた。':'写本の余白。第二次魔王戦争の「再び」。手がかりは、最初から教科書の中にありました。');
+await V('そして審問は、あなたに「討伐」と書かせる儀式でした。魔王が死んだと、世界に信じさせるための。');
+await V('解。……ただし最後の仕上げは、司書ではなく、あなたにしかできません。');
+await V('封印の儀。下のボタンを、親指で3秒間、押し続けてください。離すと破れます。');
+await seal();
+await say('司書は最後の頁に「封印」と書き込んだ。白紙の聖暦に、少しずつ色が戻っていく。','t');
+await V('……あなたの親指は、もう歴史の一部です。');
+card('TRUE END　ぜんぶ合ってる。',doubt?'<br>特典：最初から疑った司書':'')}
+else{shake();sfx([200,150,100],'sawtooth',.25);
+await V('告。ありがとう、司書。あなたの手で書かれた「討伐」は、世界の真実になりました。');
+await V('封印は、解けます。あなたがアプリを閉じても、魔王は閉じません。……おやすみなさい。');
+await say('頁は白紙のまま、書庫の灯が消えた。','t');
+card('BAD END　だいたい合ってた。','<br>ヒント：写本の余白と「再び」の一語')}
+if(a){await btns(['タイトルへ']);break}if(await btns(['最後の問いをやり直す','タイトルへ']))break}}
+async function pure(){clear();pg=0;ms=0;peek=0;tot=10;bkOK=false;bars();
+await V('告。完全暗記テスト。年表を頭に入れてください。書物は存在しません。');
+await memo(75);await act(mem(10),true);clear();card('完全暗記テスト　修了');await btns(['タイトルへ'])}
+(async()=>{for(;;){clear();pg=0;hp=100;bars();L.innerHTML=LOGO;const r=await btns(['物語を始める ▶（約10分）','完全暗記テストだけ']);r?await pure():await story()}})();
 </script>
 </body>
 </html>
