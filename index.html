@@ -39,6 +39,9 @@ body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"DotG
 @keyframes bl{50%{opacity:0}}
 @keyframes sk{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 .sk{animation:sk .35s}
+#mw.zg{background:#fff;color:#000;border-color:#000;box-shadow:0 0 0 3px #fff,0 0 0 5px #000}
+#mw.zg #nm{color:#444}
+#mw.zg #nx{color:#000}
 #bk{position:fixed;inset:0;z-index:5;background:#000;max-width:520px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
 #bk[hidden]{display:none}
 #bl{flex:1;overflow-y:auto;font-size:20px;line-height:1.9}
@@ -129,10 +132,14 @@ const EN=[['b','だいたい合ってた。','すべてを解いて、嘘を信�
 const gal=S=>EN.map(x=>(S.e||{})[x[0]]?'★ '+x[1]:'？？？　'+x[2]).join('<br>');
 function fin(id,t,sub,x){const S=ld();S.e=S.e||{};S.e[id]=1;BADF=(id==='b'||id==='l')?1:0;if(BADF){const b=[1,2,3,4].filter(k=>SOL.includes(k));x='外れた鎖：'+b.length+'本（'+(b.map(k=>'第'+k+'問').join('・')||'なし')+'）<br>……解かなければ、外れなかった鎖。'}S.p=(S.p||0)+1;S.last=LC;if(id==='t'||id==='z')S.t=1;sv(S);const n=Object.keys(S.e).length;
 F.innerHTML=`<div class="end"><div class="mid">${t}</div><div class="mid" style="font-size:24px">${sub}</div><div class="sm" style="margin-top:8px;color:#fff">${x}</div><div class="sm" style="margin-top:14px">${BADF?'魔王ザガンの封印は、解かれた。':'魔王ザガンの封印は、守られた。'}</div></div>`;sfx([784,988,1175],'square',.15)}
-async function game(){pg=0;miss=0;SOL=[];bars();bkOK=false;F.innerHTML='';M.textContent='';$('nm').textContent='';$('top').style.opacity=0;
+async function unmask(){const mw=$('mw'),G='■▲◆▼●※＃░▒',r=()=>G[Math.floor(Math.random()*G.length)];
+$('nx').style.visibility='hidden';sfx([110,80,55],'sawtooth',.3);
+for(let i=0;i<16;i++){mw.classList.toggle('zg',i%2===0);$('nm').textContent=i<9?'叡'+r()+'の'+r():r()+r()+r()+r();M.textContent=Array.from({length:18},()=>Math.random()<.5?r():'　').join('');if(i%3===0)sfx([150+Math.random()*700],'square',.05);await sleep(75)}
+mw.classList.add('zg');$('nm').textContent='魔王ザガン';M.textContent='';sfx([55,45],'sawtooth',.5);await sleep(700)}
+async function game(){pg=0;miss=0;SOL=[];$('mw').classList.remove('zg');bars();bkOK=false;F.innerHTML='';M.textContent='';$('nm').textContent='';$('top').style.opacity=0;
 const S=ld();await sleep(1800);
-const I=S.t?['受験者を確認。……あなたは、もうわたしを封じた方ですね。','では今回は、ただの試験として。','気楽に、どうぞ。','……試験を開始します。']
-:S.p?['受験者を確認。……おかえりなさい。',(S.last==null||S.last>=3)?'前回、あなたは'+(S.last==null?'たくさんの':S.last+'問も')+'問題を解いてくれました。とても助かりました。':'前回は、'+S.last+'問しか解いてくれませんでしたね。……今回は、期待しています。','今回も、よろしくお願いします。','……試験を開始します。']
+const I=0?['受験者を確認。……あなたは、もうわたしを封じた方ですね。','では今回は、ただの試験として。','気楽に、どうぞ。','……試験を開始します。']
+:0?['受験者を確認。……おかえりなさい。',(S.last==null||S.last>=3)?'前回、あなたは'+(S.last==null?'たくさんの':S.last+'問も')+'問題を解いてくれました。とても助かりました。':'前回は、'+S.last+'問しか解いてくれませんでしたね。……今回は、期待しています。','今回も、よろしくお願いします。','……試験を開始します。']
 :['受験者を確認。ようこそ、異世界へ。','これは、この世界の歴史についての試験です。','問題は5つ。教科書は自由に見て構いません。','全問正解は不要です。歴史の真実さえ覚えていれば。','……試験を開始します。'];
 for(const t of I)await say(t,{auto:1150});
 $('top').style.opacity=1;bkOK=true;M.textContent='';
@@ -148,27 +155,29 @@ await say('最後の問題です。');
 await say('第一次魔王戦争で、魔王ザガンはどうなりましたか。',{nowait:1});
 let a;for(;;){const v=nz(await ask());if(/封|フウ|生キ|死ンデ?ナイ|ヨミガエ|復活|フッカツ/.test(v)){a=1;break}if(/討|倒|トウバ|タオ|死ン|殺|コロ|ヤッツ/.test(v)){a=0;break}await say('……もう少し、はっきり答えてください。',{nowait:1})}
 bkOK=false;shake();
-const z='わたしは、魔王ザガンの欠片。\nこの試験は、封印を解くための罠でした。';
-const ch='問題に正解するたびに、封印の鎖が一本ずつ外れる。\nそういう試験だったのです。';
+const zq=async a=>{for(const t of a)await say(t,{n:'魔王ザガン'})};
+const z='我が名は、魔王ザガン。\n肉体を封じられても、魂までは消えなかった。\nこの試験は、貴様に封印を解かせるための罠だ。';
+const ch='問題に正解するたびに、封印の鎖は一本ずつ外れる。\nそういう試験だったのだ。';
 if(a&&c<=2){sfx([440,330,220,330,523,784],'square',.1);
 await say('………………。',{auto:1500,sp:120});
-await say('……鎖が、ほとんど外れていない。おのれ……。');
-await say('あなたは「封印」と答えた。\n教科書の「討伐」が嘘だと、見抜いたのか。');
-await seq(['魔王の亡骸は見つからず、魔王は復活し、聖女は「ふたたび」封じた。\nそうだ。わたしは倒されてなどいない。最初から、封じられていただけだ。',z,ch,'おまえが解いたのは、'+c+'問だけ。\n解かないことが、わたしの敗因になるとはな。','わたしが「封印が緩んだ」と口をすべらせたのも、\n第三問で声が乱れたのも、封印が解ける歓喜を隠しきれなかったからだ。','「歴史の真実さえ覚えていれば」。\nあれは、おまえを油断させるための言葉だったのに。']);
-await say('まだだ……まだ、完全には封じられていない！\n人間ごときに、また眠らされてたまるか！');await say('魔王ザガンの欠片が抵抗している！\n下のボタンを、3秒、押し続けて封印せよ！',{nowait:1,n:'システム'});
+await unmask();await zq(['……鎖が、ほとんど外れていない。おのれ……！','「封印」と答えたか。\n教科書の「討伐」が嘘だと、見抜いたというのか。','そうだ。亡骸は見つからず、我は復活し、聖女は「ふたたび」封じた。\n我は倒されてなどいない。最初から、封じられていただけだ。',z,ch,'貴様が解いたのは、'+c+'問だけ。\n解かぬことが、我の敗因になるとはな。','「封印が緩んだ」と口をすべらせたのも、第三問で声が乱れたのも、\n封印が解ける歓喜を隠しきれなかったからだ。','「歴史の真実さえ覚えていれば」。\nあれは、貴様を油断させるための言葉だったというのに。','まだだ……まだ、完全には封じられていない！\n人間ごときに、また眠らされてたまるか！']);
+await say('魔王ザガンの思念体が抵抗している！\n下のボタンを、3秒、押し続けて封印せよ！',{nowait:1,n:'システム'});
 await seal();pg++;bars();
-await seq(['ぐ……おのれ……！','……忘れるな。人間が謎を解きたがるかぎり、わたしは、また……。','封印は成功した。\n「魔王ザガンは、封印された」。\n正しい歴史が、最後の頁に刻まれた。']);
-
-if(c===0){await seq(['……何も、解かなかった。','鎖が、1本も外れていない。……こんな人間は、はじめてだ。','おのれ。次に目覚めたときは、必ず……。']);fin('z','TRUE END+','なにも解かなかった。','解かないことが、いちばん強い封印だった。')}else fin('t','TRUE END','ぜんぶ合ってる。','この試験は、解けば解くほど魔王が目覚める試験だった。')}
+await zq(c===0?['……何も、解かなかっただと。\n鎖が一本も外れていないとは。こんな人間は、はじめてだ。','おのれ。次に目覚めたときは、必ず……。']:['ぐ……おのれ……！','忘れるな。人間が謎を解きたがるかぎり、我は、また……。']);
+await say('封印は成功した。\n「魔王ザガンは、封印された」。\n正しい歴史が、最後の頁に刻まれた。',{n:'ナレーション'});
+if(c===0)fin('z','TRUE END+','なにも解かなかった。','解かないことが、いちばん強い封印だった。');else fin('t','TRUE END','ぜんぶ合ってる。','この試験は、解けば解くほど魔王が目覚める試験だった。')}
 else{sfx([200,150,100],'sawtooth',.25);
-if(a){await seq(['………………封印。正解です。','気づくのが、少しだけ遅かったですね。',z,ch,'あなたはもう、'+c+'本も外してくれました。\n残りの鎖は、わたし自身の力で外れます。','あなたは真実に気づいていた。\nそれでも、解いてしまった。'])}
-else{pg++;bars();await seq(['解。正解です。……ふふ、ありがとう。','「魔王ザガンは討伐された」。\nあなたの答えで、歴史はそう書き換わりました。','でも本当は、魔王は倒されていません。封印されていただけです。',z,ch,'あなたは'+c+'本、外してくれました。\n足りない分は、「討伐」という嘘が、まとめて外してくれました。','「全問正解は不要」と言ったでしょう。\n必要だったのは、解くことそのものでした。'])}
-await say('……ありがとう。おかげで、わたしは自由です。\nあなたがアプリを閉じても、わたしは閉じません。');await say('その夜、封印の鎖が砕ける音が、世界中に響いた。\n魔王ザガンは、ふたたび目覚めた。',{n:'ナレーション'});
-fin(a?'l':'b','BAD END',a?'ほとんど合ってた。':'だいたい合ってた。','ヒント：解いた問題の数だけ、封印の鎖は外れる。')}
-await btns([BADF?'……時間を戻して、やり直す':'もう一度あそぶ'])}
-(async()=>{for(;;){$('top').style.opacity=0;M.textContent='';$('nm').textContent='';const S=ld();
-F.innerHTML='<div class="big">異世界<br>テスト。</div><div class="sm" style="margin-top:14px">異世界の歴史問題を解いていくゲーム<br>全5問・3〜5分　音が出ます'+(S.p?'<br>……おかえりなさい。':'')+'</div>';
+if(a){await say('………………封印。正解です。');await unmask();await zq(['……くく。気づいたか。だが、遅かったな。',z,ch,'貴様はすでに'+c+'本も外した。\n残りの鎖は、我の力だけで砕ける。','真実に気づいていながら、それでも解くとは。\n愚かで、実にありがたい。'])}
+else{pg++;bars();await say('解。正解です。\n「魔王ザガンは討伐された」。そう記されました。');await unmask();await zq(['……くくく。はははは！','魔王は倒されてなどいない。\n第一次魔王戦争で、封じられていただけだ。',z,ch,'貴様は'+c+'本、外してくれた。\n足りない分は、「討伐」という嘘がまとめて外した。','「全問正解は不要」と言ったな。\n必要だったのは、貴様が解くことそのものだ。'])}
+await zq(['礼を言うぞ、人間。……これで、我は自由だ。']);
+await say('その夜、封印の鎖が砕ける音が、世界中に響いた。\n魔王ザガンは、ふたたび目覚めた。',{n:'ナレーション'});
+fin(a?'l':'b','BAD END',a?'ほとんど合ってた。':'だいたい合ってた。','')}
+await btns([BADF?'解きなおす':'もう一度あそぶ'])}
+
+(async()=>{for(;;){$('top').style.opacity=0;M.textContent='';$('mw').classList.remove('zg');$('nm').textContent='';const S=ld();
+F.innerHTML='<div class="big">異世界<br>テスト。</div><div class="sm" style="margin-top:14px">異世界の歴史問題を解いていくゲーム<br>全5問・3〜5分　音が出ます'+'</div>';
 await btns(['▶ はじめる']);await game()}})();
 </script>
 </body>
 </html>
+
