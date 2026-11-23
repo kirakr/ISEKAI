@@ -18,13 +18,14 @@ body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"DotG
 #st{flex:1;font-size:18px}
 #st b{font-size:24px}
 #sn{font:inherit;font-size:16px;color:#fff;cursor:pointer}
-#field{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow-y:auto}
+#field{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow-y:auto;transition:opacity .45s ease,transform .45s ease}
 .big{font-size:44px;line-height:1.3;letter-spacing:.08em}
+.question{width:100%;max-width:480px;margin-top:16px;font-size:clamp(19px,5vw,25px);line-height:1.65;white-space:normal;overflow-wrap:anywhere}
 .titleLine{font-size:clamp(22px,8.5vw,44px);white-space:nowrap;letter-spacing:.04em;line-height:1.3}
 .mid{font-size:30px;line-height:1.5}
 .sm{font-size:16px;color:var(--dim);line-height:1.8}
 .end{border:3px solid #fff;padding:16px;margin:6px;line-height:1.8}
-#cmd{display:flex;flex-direction:column;gap:8px;padding-bottom:0}
+#cmd{display:flex;flex-direction:column;gap:8px;padding-bottom:0;transition:opacity .45s ease}
 .book-btn{position:static!important;transform:none!important;width:100%!important;max-width:500px!important;z-index:auto!important;margin:0 auto!important;flex:0 0 auto!important;display:none!important}.book-btn.visible{display:block!important}
 .btn{font:inherit;font-size:22px;color:#fff;text-align:left;min-height:56px;cursor:pointer;width:100%}
 .btn::before{content:"▶ ";visibility:hidden}
@@ -79,10 +80,10 @@ const T=[
 "聖暦640年、魔王ザガンが**復活**し、第二次魔王戦争が始まった。聖女ミレイユは**祈り**の儀式で、魔王をふたたび封じた。",
 "聖暦700年、王国は百年祭を開いた。"];
 const Q=[
-["女神アルセイアが人間に魔法を授けたのは、聖暦何年のことか。",["1"],"教科書を確認してください。（キーワード：女神）",1,"聖暦1年"],
-["竜王ヴァルガと盟約を結んだ、初代王の名は。",["エルド"],"教科書を確認してください。（キーワード：盟約）",0,"エルド"],
-["勇者タクミが魔王ザガンを倒したと言われる、第一次魔王戦争は聖暦何年のことか。",["245"],"教科書を確認してください。（キーワード：タクミ）",1,"聖暦245年"],
-["聖女ミレイユは、何の儀式によって魔王を封じたか。",["祈り","祈","いのり"],"教科書を確認してください。（キーワード：ミレイユ）",0,"祈り"]];
+["女神アルセイアが人間に魔法を授けたのは、聖暦何年のことか。",["1"],"教科書を確認してください。",1,"聖暦1年"],
+["竜王ヴァルガと盟約を結んだ、初代王の名は。",["エルド"],"教科書を確認してください。",0,"エルド"],
+["勇者タクミが魔王ザガンを倒したと言われる、第一次魔王戦争は聖暦何年のことか。",["245"],"教科書を確認してください。",1,"聖暦245年"],
+["聖女ミレイユは、何の儀式によって魔王を封じたか。",["祈り","祈","いのり"],"教科書を確認してください。",0,"祈り"]];
 const $=i=>document.getElementById(i),F=$('field'),C=$('cmd'),M=$('msg'),sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const nz=s=>s.normalize('NFKC').replace(/[\s。、．，・「」『』]/g,'').replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+96)).toLowerCase();
 let AC,snd=true,skip=false,typing=false,tap=null,pg=0,bkOK=false;
@@ -92,15 +93,23 @@ const bars=()=>{$('lv').textContent=pg};
 function shake(){}
 $('sn').onclick=()=>{snd=!snd;$('sn').textContent=snd?'音 ON':'音 OFF'};
 $('mw').onclick=()=>{if(typing)skip=true;else if(tap){const f=tap;tap=null;$('nx').style.visibility='hidden';f()}};
-// メッセージ表示。opt.auto=ms なら自動送り、タップで次へ
+// メッセージ表示。すべてのセリフはタップするまで次へ進まない。
 async function say(t,opt={}){
-// スクロールが必要になる長文は、句読点を優先して短いタップ送りに分割
-if(!opt.auto&&!opt.nowait&&t.length>28){const chunks=[];let rest=t.replace(/\n+/g,'');while(rest.length>28){let cut=-1;for(let i=28;i>=16;i--){if(/[。！!？?]/.test(rest[i-1])){cut=i;break}}if(cut<0)cut=28;chunks.push(rest.slice(0,cut));rest=rest.slice(cut)}if(rest)chunks.push(rest);for(const part of chunks)await say(part,opt);return}
+// 長文は文末・読点を優先して分割。句末の文字だけが次画面に孤立しないようにする。
+if(t.length>26){
+ const chunks=[];let rest=t.replace(/\s*\n+\s*/g,'');
+ while(rest.length>26){let cut=-1;
+  for(let i=Math.min(26,rest.length);i>=12;i--){if(/[。！!？?]/.test(rest[i-1])){cut=i;break}}
+  if(cut<0){for(let i=Math.min(26,rest.length);i>=12;i--){if(/[、，]/.test(rest[i-1])){cut=i;break}}}
+  if(cut<0)break;
+  chunks.push(rest.slice(0,cut));rest=rest.slice(cut);
+ }
+ if(rest)chunks.push(rest);
+ if(chunks.length>1){for(const part of chunks)await say(part,opt);return}
+}
 $('nm').textContent=opt.n===undefined?'叡智の声':opt.n;M.textContent='';skip=false;typing=true;
 for(let i=1;i<=t.length;i++){if(skip){M.textContent=t;break}M.textContent=t.slice(0,i);if(i%2&&!/[\s。、…\n]/.test(t[i-1]))blip();await sleep(opt.sp||34)}
 M.textContent=t;typing=false;
-if(opt.auto){await sleep(opt.auto);return}
-if(opt.nowait)return;
 $('nx').style.visibility='visible';await new Promise(r=>tap=r)}
 function btns(a){return new Promise(r=>{C.innerHTML='';a.forEach((t,i)=>{const b=document.createElement('button');b.className='btn win';b.textContent=t;b.onclick=()=>{sfx([900,1200],'square',.05);C.innerHTML='';r(i)};C.appendChild(b)})})}
 function renderBook(w){const n=nz(w),hl=t=>w?t.split(w).join('<mark>'+w+'</mark>'):t;
@@ -113,21 +122,47 @@ function seal(){return new Promise(r=>{C.innerHTML='<button id="sl" class="btn w
 const st=e=>{e.preventDefault();t0=Date.now();clearInterval(iv);iv=setInterval(()=>{const d=Date.now()-t0;b.textContent='封印中… '+(d/1000).toFixed(1)+' / 3.0秒';sfx([440+d/6],'triangle',.08);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}if(d>=3000){clearInterval(iv);C.innerHTML='';sfx([523,659,784,1047],'square',.12);r()}},100)},
 en=()=>{if(t0){clearInterval(iv);t0=0;b.textContent='指をはなすと失敗！もう一度、押し続けて！';sfx([150],'sawtooth',.25);shake()}};
 b.addEventListener('pointerdown',st);['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,en));b.oncontextmenu=e=>e.preventDefault()})}
-const head=t=>{F.innerHTML=`<div class="big">${t}</div>`};
+const head=(t,q='')=>{F.innerHTML=`<div class="big">${t}</div>${q?'<div class="question">'+q+'</div>':''}`};
+function clearDialogue(){M.textContent='';$('nm').textContent='';$('nx').style.visibility='hidden'}
+function ensureAnswerRow(){
+ let w=$('answerRow');
+ if(!w){w=document.createElement('div');w.id='answerRow';w.className='row';w.innerHTML='<input id="a" class="in" type="text" autocomplete="off" autocapitalize="off" enterkeyhint="send" placeholder="ここに入力"><button id="g" class="btn win send">送信</button><button id="dontknow" class="btn win">わからない</button>';C.appendChild(w)}
+ return w;
+}
+async function showQuestion(t,q){
+ clearDialogue();
+ C.style.opacity='0';C.style.pointerEvents='none';
+ F.style.opacity='0';F.style.transform='translateY(10px)';
+ await sleep(450);
+ head(t,q);
+ ensureAnswerRow();
+ // フェードイン前に前の入力を消去し、古い回答が一瞬だけ見えるのを防ぐ。
+ const prevInput=$('a'),prevSend=$('g'),prevDont=$('dontknow');
+ if(prevInput){prevInput.value='';prevInput.defaultValue='';prevInput.disabled=false;}
+ if(prevSend)prevSend.disabled=false;
+ if(prevDont)prevDont.disabled=false;
+ // 両方の配置を先に確定させ、問題文と解答欄を同じタイミングでフェードイン。
+ await sleep(40);
+ F.style.opacity='1';F.style.transform='translateY(0)';
+ C.style.opacity='1';C.style.pointerEvents='';
+ await sleep(500);
+}
 let miss=0;
 const ld=()=>{try{return JSON.parse(localStorage.getItem('isekai_test')||'{}')}catch(e){return {}}};
 const sv=o=>{try{localStorage.setItem('isekai_test',JSON.stringify(o))}catch(e){}};
 function ask(sk){return new Promise(r=>{
+clearDialogue();
 const dock=$('bookDock');dock.classList.toggle('visible',bkOK);
-let w=$('answerRow');if(!w){w=document.createElement('div');w.id='answerRow';w.className='row';w.innerHTML='<input id="a" class="in" type="text" autocomplete="off" autocapitalize="off" enterkeyhint="send" placeholder="ここに入力"><button id="g" class="btn win send">送信</button><button id="dontknow" class="btn win">わからない</button>';C.appendChild(w)}
+ensureAnswerRow();
 let a=$('a'),g=$('g'),b=$('dontknow');a.value='';a.disabled=false;g.disabled=false;b.disabled=false;
 b.onclick=()=>{a.disabled=true;g.disabled=true;b.disabled=true;r(null)};
 const go=()=>{const v=a.value.trim();if(!v)return;a.disabled=true;g.disabled=true;b.disabled=true;r(v)};g.onclick=go;a.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)go()};
 })}
-async function quiz(n){const q=Q[n];head('第'+(n+1)+'問');await say(q[0],{nowait:1});
+async function quiz(n){const q=Q[n];await showQuestion('第'+(n+1)+'問',q[0]);
 let v=await ask(1),ok=v!==null&&judge(q,v);
-if(!ok){miss++;sfx([120,90],'sawtooth',.15);
-if(miss>1){shake();await say('…………どうか、解いてください。\n'+q[2],{nowait:1})}
+if(v===null||!ok){miss++;sfx([120,90],'sawtooth',.15);
+if(v===null)await say('……分からない、ですね。'+q[2]+'\n解答は、あと一度だけ受け付けます。',{nowait:1});
+else if(miss>1){shake();await say('…………どうか、解いてください。\n'+q[2],{nowait:1})}
 else await say('……誤りです。'+q[2]+'\n解答は、あと一度だけ受け付けます。',{nowait:1});
 v=await ask(1);ok=v!==null&&judge(q,v)}
 if(ok){pg++;SOL.push(n+1);bars();sfx([660,880,1320],'square',.07);return 1}
@@ -158,9 +193,8 @@ if(await quiz(2)){await say('解。正解です。',{auto:900});await say('…�
 if(await quiz(3))await say('解。正解です。',{auto:800});
 await say('第二次魔王戦争は、魔王の封印が緩んだことで始まりました。');
 await say('…………。',{auto:1400,sp:120});await say('次が、最後の問題です。');
-const c=pg;LC=c;head('最終問題');bkOK=true;$('bookDock').classList.add('visible');
-await say('第一次魔王戦争で、魔王ザガンはどうなりましたか。',{nowait:1});
-let a;for(;;){const raw=await ask(1);if(raw===null){await say('……答えを入力してください。',{nowait:1});continue}const v=nz(raw);if(/封|フウ|生キ|死ンデ?ナイ|ヨミガエ|復活|フッカツ/.test(v)){a=1;break}if(/討|倒|トウバ|タオ|死ン|殺|コロ|ヤッツ/.test(v)){a=0;break}await say('……もう少し、はっきり答えてください。',{nowait:1})}
+const c=pg;LC=c;await showQuestion('最終問題','第一次魔王戦争で、魔王ザガンはどうなりましたか。');bkOK=true;$('bookDock').classList.add('visible');
+let a;for(;;){const raw=await ask(1);if(raw===null){a=0;break}const v=nz(raw);if(/封|フウ|生キ|死ンデ?ナイ|ヨミガエ|復活|フッカツ/.test(v)){a=1;break}if(/討|倒|トウバ|タオ|死ン|殺|コロ|ヤッツ/.test(v)){a=0;break}await say('……もう少し、はっきり答えてください。',{nowait:1})}
 bkOK=false;$('bookDock').classList.remove('visible');shake();
 const zq=async a=>{for(const t of a){const parts=t.split(/\n+/).flatMap(line=>line.trim().split(/(?<=[。！!？?])/).map(x=>x.trim()).filter(Boolean));for(const p of parts)await say(p,{n:'魔王ザガン'})}};
 const z='我が名は、魔王ザガン。\n肉体を封じられても、魂までは消えなかった。\nこの試験は、貴様に封印を解かせるための罠だ。';
