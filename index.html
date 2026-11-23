@@ -20,6 +20,7 @@ body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"DotG
 #sn{font:inherit;font-size:16px;color:#fff;cursor:pointer}
 #field{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow-y:auto}
 .big{font-size:44px;line-height:1.3;letter-spacing:.08em}
+.titleLine{font-size:clamp(22px,8.5vw,44px);white-space:nowrap;letter-spacing:.04em;line-height:1.3}
 .mid{font-size:30px;line-height:1.5}
 .sm{font-size:16px;color:var(--dim);line-height:1.8}
 .end{border:3px solid #fff;padding:16px;margin:6px;line-height:1.8}
@@ -92,7 +93,10 @@ function shake(){}
 $('sn').onclick=()=>{snd=!snd;$('sn').textContent=snd?'音 ON':'音 OFF'};
 $('mw').onclick=()=>{if(typing)skip=true;else if(tap){const f=tap;tap=null;$('nx').style.visibility='hidden';f()}};
 // メッセージ表示。opt.auto=ms なら自動送り、タップで次へ
-async function say(t,opt={}){$('nm').textContent=opt.n===undefined?'叡智の声':opt.n;M.textContent='';skip=false;typing=true;
+async function say(t,opt={}){
+// スクロールが必要になる長文は、句読点を優先して短いタップ送りに分割
+if(!opt.auto&&!opt.nowait&&t.length>28){const chunks=[];let rest=t.replace(/\n+/g,'');while(rest.length>28){let cut=-1;for(let i=28;i>=16;i--){if(/[。！!？?]/.test(rest[i-1])){cut=i;break}}if(cut<0)cut=28;chunks.push(rest.slice(0,cut));rest=rest.slice(cut)}if(rest)chunks.push(rest);for(const part of chunks)await say(part,opt);return}
+$('nm').textContent=opt.n===undefined?'叡智の声':opt.n;M.textContent='';skip=false;typing=true;
 for(let i=1;i<=t.length;i++){if(skip){M.textContent=t;break}M.textContent=t.slice(0,i);if(i%2&&!/[\s。、…\n]/.test(t[i-1]))blip();await sleep(opt.sp||34)}
 M.textContent=t;typing=false;
 if(opt.auto){await sleep(opt.auto);return}
@@ -134,8 +138,8 @@ let LC=0,SOL=[],BADF=0;
 const EN=[['b','だいたい合ってた。','すべてを解いて、嘘を信じた者へ'],['l','ほとんど合ってた。','真実に気づきながら、解きすぎた者へ'],['t','ぜんぶ合ってる。','鎖を残し、真実を告げた者へ'],['z','なにも解かなかった。','なにも、しなかった者へ']];
 const gal=S=>EN.map(x=>(S.e||{})[x[0]]?'★ '+x[1]:'？？？　'+x[2]).join('<br>');
 function fin(id,t,sub,x){const S=ld();S.e=S.e||{};S.e[id]=1;BADF=(id==='b'||id==='l')?1:0;if(BADF){const b=[1,2,3,4].filter(k=>SOL.includes(k));x='外れた鎖：'+b.length+'本（'+(b.map(k=>'第'+k+'問').join('・')||'なし')+'）<br>……解かなければ、外れなかった鎖。'}S.p=(S.p||0)+1;S.last=LC;if(id==='t'||id==='z')S.t=1;sv(S);const n=Object.keys(S.e).length;
-F.innerHTML=`<div class="end"><div class="mid">${t}</div><div class="mid" style="font-size:24px">${sub}</div><div class="sm" style="margin-top:8px;color:#fff">${x}</div><div class="sm" style="margin-top:14px">${BADF?'魔王ザガンの封印は、解かれた。':'魔王ザガンの封印は、守られた。'}</div></div>`;sfx([784,988,1175],'square',.15)}
-async function unmask(){const mw=$('mw'),G='■▲◆▼●※＃░▒',r=()=>G[Math.floor(Math.random()*G.length)];
+F.innerHTML=`<div class="end"><div class="big">${t.startsWith('TRUE')?'TRUE END':'BAD END'}</div></div>`;sfx([784,988,1175],'square',.15)}
+async function unmask(){F.innerHTML='';const mw=$('mw'),G='■▲◆▼●※＃░▒',r=()=>G[Math.floor(Math.random()*G.length)];
 C.innerHTML='';$('bookDock').classList.remove('visible');$('nx').style.visibility='hidden';sfx([110,80,55],'sawtooth',.3);
 for(let i=0;i<16;i++){mw.classList.toggle('zg',i%2===0);$('nm').textContent=i<9?'叡'+r()+'の'+r():r()+r()+r()+r();M.textContent=Array.from({length:18},()=>Math.random()<.5?r():'　').join('');if(i%3===0)sfx([150+Math.random()*700],'square',.05);await sleep(75)}
 mw.classList.add('zg');$('nm').textContent='魔王ザガン';M.textContent='';sfx([55,45],'sawtooth',.5);await sleep(700)}
@@ -144,7 +148,7 @@ const S=ld();await sleep(1800);
 const I=0?['受験者を確認。……あなたは、もうわたしを封じた方ですね。','では今回は、ただの試験として。','気楽に、どうぞ。','……試験を開始します。']
 :0?['受験者を確認。……おかえりなさい。',(S.last==null||S.last>=3)?'前回、あなたは'+(S.last==null?'たくさんの':S.last+'問も')+'問題を解いてくれました。とても助かりました。':'前回は、'+S.last+'問しか解いてくれませんでしたね。……今回は、期待しています。','今回も、よろしくお願いします。','……試験を開始します。']
 :['受験者を確認。ようこそ、異世界へ。','これは、この世界の歴史についての試験です。','問題は5つ。教科書は自由に見て構いません。','全問正解は不要です。歴史の真実さえ覚えていれば。','……試験を開始します。'];
-for(const t of I)await say(t,{auto:1150});
+for(const t of I)await say(t);
 $('top').style.opacity=1;bkOK=true;M.textContent='';
 C.innerHTML='';$('bookDock').classList.toggle('visible',bkOK);
 await say('下の「📖 教科書を調べる」から、いつでも教科書を開けます。');
@@ -158,7 +162,7 @@ const c=pg;LC=c;head('最終問題');bkOK=true;$('bookDock').classList.add('visi
 await say('第一次魔王戦争で、魔王ザガンはどうなりましたか。',{nowait:1});
 let a;for(;;){const raw=await ask(1);if(raw===null){await say('……答えを入力してください。',{nowait:1});continue}const v=nz(raw);if(/封|フウ|生キ|死ンデ?ナイ|ヨミガエ|復活|フッカツ/.test(v)){a=1;break}if(/討|倒|トウバ|タオ|死ン|殺|コロ|ヤッツ/.test(v)){a=0;break}await say('……もう少し、はっきり答えてください。',{nowait:1})}
 bkOK=false;$('bookDock').classList.remove('visible');shake();
-const zq=async a=>{for(const t of a){const parts=t.split(/\\n+/).flatMap(line=>line.split(/(?<=[。！!？?])/).filter(x=>x));for(const p of parts)await say(p,{n:'魔王ザガン'})}};
+const zq=async a=>{for(const t of a){const parts=t.split(/\n+/).flatMap(line=>line.trim().split(/(?<=[。！!？?])/).map(x=>x.trim()).filter(Boolean));for(const p of parts)await say(p,{n:'魔王ザガン'})}};
 const z='我が名は、魔王ザガン。\n肉体を封じられても、魂までは消えなかった。\nこの試験は、貴様に封印を解かせるための罠だ。';
 const ch='問題に正解するたびに、封印の鎖は一本ずつ外れる。\nそういう試験だったのだ。';
 if(a&&c<=2){sfx([440,330,220,330,523,784],'square',.1);
@@ -178,7 +182,7 @@ fin(a?'l':'b','BAD END',a?'ほとんど合ってた。':'だいたい合って�
 await btns([BADF?'解きなおす':'もう一度あそぶ'])}
 
 (async()=>{for(;;){$('top').style.opacity=0;M.textContent='';$('mw').classList.remove('zg');$('nm').textContent='';const S=ld();
-F.innerHTML='<div class="big">異世界<br>テスト。</div><div class="sm" style="margin-top:14px">異世界の歴史問題を解いていくゲーム<br>全5問・3〜5分　音が出ます'+'</div>';
+F.innerHTML='<div class="titleLine">異世界テスト。</div><div class="sm" style="margin-top:14px">異世界の歴史問題を解いていくゲーム<br>全5問・3〜5分　音が出ます</div>';
 await btns(['▶ はじめる']);await game()}})();
 </script>
 </body>
