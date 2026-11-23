@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>異世界テスト。</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
+<style>
+:root{--bg:#000;--fg:#fff;--dim:#aaa;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"DotGothic16","Hiragino Sans","Yu Gothic",Meiryo,monospace;font-size:20px;overscroll-behavior:none}
+#app{height:100%;max-width:520px;margin:0 auto;padding:10px;display:flex;flex-direction:column;gap:10px}
+.win{background:#000;border:3px solid #fff;border-radius:8px;box-shadow:0 0 0 3px #000,0 0 0 5px #fff;padding:12px 14px}
+#top{display:flex;gap:10px;align-items:stretch;transition:opacity .8s}
+#st{flex:1;font-size:18px}
+#st b{font-size:24px}
+#sn{font:inherit;font-size:16px;color:#fff;cursor:pointer}
+#field{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow-y:auto}
+.big{font-size:44px;line-height:1.3;letter-spacing:.08em}
+.mid{font-size:30px;line-height:1.5}
+.sm{font-size:16px;color:var(--dim);line-height:1.8}
+.end{border:3px solid #fff;padding:16px;margin:6px;line-height:1.8}
+#cmd{display:flex;flex-direction:column;gap:8px}
+.btn{font:inherit;font-size:22px;color:#fff;text-align:left;min-height:56px;cursor:pointer;width:100%}
+.btn::before{content:"▶ ";visibility:hidden}
+.btn:active,.btn:focus-visible,.btn:hover{background:#fff;color:#000}
+.btn:active::before,.btn:hover::before,.btn:focus-visible::before{visibility:visible}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.in{font:inherit;font-size:22px;color:#fff;background:#000;border:3px solid #fff;border-radius:8px;padding:12px;outline:none;min-width:0;width:100%}
+.in::placeholder{color:#777}
+.send{flex:0 0 96px!important;text-align:center}
+.send::before{content:""}
+#mw{min-height:180px;position:relative;cursor:pointer;user-select:none;-webkit-user-select:none}
+#nm{font-size:16px;color:var(--dim);margin-bottom:6px}
+#msg{font-size:24px;line-height:1.7;white-space:pre-wrap;min-height:120px;padding-bottom:20px}
+#nx{position:absolute;right:16px;bottom:8px;font-size:20px;animation:bl 1s steps(2) infinite;visibility:hidden}
+@keyframes bl{50%{opacity:0}}
+@keyframes sk{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.sk{animation:sk .35s}
+#bk{position:fixed;inset:0;z-index:5;background:#000;max-width:520px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+#bk[hidden]{display:none}
+#bl{flex:1;overflow-y:auto;font-size:20px;line-height:1.9}
+#bl p{margin:0 0 14px;padding-bottom:12px;border-bottom:1px dashed #666}
+#bl b{border-bottom:2px solid #fff}
+#bl mark{background:#fff;color:#000}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="top" style="opacity:0"><div class="win" id="st">解いた問題　<b id="lv">0</b> / 5</div><button class="win" id="sn">音 ON</button></div>
+<div id="field"></div>
+<div id="cmd"></div>
+<div class="win" id="mw"><div id="nm"></div><div id="msg"></div><span id="nx">▼</span></div>
+<div id="bk" hidden><div class="win" style="display:flex;justify-content:space-between;align-items:center"><span>📖 聖暦史（写本）</span><button class="btn win" id="bx" style="width:auto;min-height:0;padding:6px 12px;font-size:18px">閉じる</button></div><input id="bs" class="in" type="search" placeholder="ことばで検索（例：盟約）" autocomplete="off"><div id="bl" class="win"></div></div>
+</div>
+<script>
+const T=[
+"聖暦1年、女神アルセイアが大地に降り立ち、人間に**魔法**を授けた。この年を聖暦の元年とする。",
+"聖暦12年、人々は最初の村「ハジメ」をつくった。",
+"聖暦40年、魔法を学ぶ学び舎が3つ建てられた。",
+"聖暦98年、初代王**エルド**が、山に住む竜王ヴァルガと**盟約**を結んだ。竜は王国を守ると約束した。",
+"聖暦130年、王都に大きな城壁が完成した。",
+"聖暦245年、北に現れた魔王ザガンとの戦い（第一次魔王戦争）があった。勇者タクミが魔王ザガンを**討伐**したと記されている。ただし、魔王の亡骸はついに見つからなかった。",
+"聖暦300年、竜王ヴァルガが長い眠りについた。",
+"聖暦590年、学者エイダが大書庫を建て、歴史書の**写本**をつくった。第一次魔王戦争の部分だけ、原本と写本で書き方がちがう。",
+"聖暦612年、聖女ミレイユが生まれた。",
+"聖暦640年、魔王ザガンが**復活**し、第二次魔王戦争が始まった。聖女ミレイユは**祈り**の儀式で、魔王をふたたび封じた。",
+"聖暦700年、王国は百年祭を開いた。"];
+const Q=[
+["女神アルセイアが人間に魔法を授けたのは、聖暦何年のことか。",["1"],"教科書を確認してください。（キーワード：女神）",1,"聖暦1年"],
+["竜王ヴァルガと盟約を結んだ、初代王の名は。",["エルド"],"教科書を確認してください。（キーワード：盟約）",0,"エルド"],
+["勇者タクミが魔王ザガンを倒したと言われる、第一次魔王戦争は聖暦何年のことか。",["245"],"教科書を確認してください。（キーワード：タクミ）",1,"聖暦245年"],
+["聖女ミレイユは、何の儀式によって魔王を封じたか。",["祈り","祈","いのり"],"教科書を確認してください。（キーワード：ミレイユ）",0,"祈り"]];
+const $=i=>document.getElementById(i),F=$('field'),C=$('cmd'),M=$('msg'),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const nz=s=>s.normalize('NFKC').replace(/[\s。、．，・「」『』]/g,'').replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+96)).toLowerCase();
+let AC,snd=true,skip=false,typing=false,tap=null,pg=0,bkOK=false;
+function sfx(fs,ty='square',d=.1){if(!snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();fs.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*d;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.05,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)})}catch(e){}}
+const blip=()=>sfx([700],'square',.03);
+const bars=()=>{$('lv').textContent=pg};
+function shake(){}
+$('sn').onclick=()=>{snd=!snd;$('sn').textContent=snd?'音 ON':'音 OFF'};
+$('mw').onclick=()=>{if(typing)skip=true;else if(tap){const f=tap;tap=null;$('nx').style.visibility='hidden';f()}};
+// メッセージ表示。opt.auto=ms なら自動送り、タップで次へ
+async function say(t,opt={}){$('nm').textContent=opt.n===undefined?'叡智の声':opt.n;M.textContent='';skip=false;typing=true;
+for(let i=1;i<=t.length;i++){if(skip){M.textContent=t;break}M.textContent=t.slice(0,i);if(i%2&&!/[\s。、…\n]/.test(t[i-1]))blip();await sleep(opt.sp||34)}
+M.textContent=t;typing=false;
+if(opt.auto){await sleep(opt.auto);return}
+if(opt.nowait)return;
+$('nx').style.visibility='visible';await new Promise(r=>tap=r)}
+function btns(a){return new Promise(r=>{C.innerHTML='';a.forEach((t,i)=>{const b=document.createElement('button');b.className='btn win';b.textContent=t;b.onclick=()=>{sfx([900,1200],'square',.05);C.innerHTML='';r(i)};C.appendChild(b)})})}
+function ask(chips){return new Promise(r=>{C.innerHTML='';
+if(bkOK){const b=document.createElement('button');b.className='btn win';b.textContent='📖 教科書を調べる';b.onclick=bookOpen;C.appendChild(b)}
+if(chips){const w=document.createElement('div');w.className='row';chips.forEach(c=>{const b=document.createElement('button');b.className='btn win';b.style.textAlign='center';b.textContent=c;b.onclick=()=>{$('a').value=c;$('a').focus()};w.appendChild(b)});C.appendChild(w)}
+const w=document.createElement('div');w.className='row';w.innerHTML='<input id="a" class="in" type="text" autocomplete="off" autocapitalize="off" enterkeyhint="send" placeholder="ここに入力"><button id="g" class="btn win send">送信</button>';C.appendChild(w);
+const a=$('a'),go=()=>{const v=a.value.trim();if(!v)return;C.innerHTML='';r(v)};$('g').onclick=go;a.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)go()}})}
+function renderBook(w){const n=nz(w),hl=t=>w?t.split(w).join('<mark>'+w+'</mark>'):t;
+const h=T.filter(p=>!n||nz(p).includes(n)).map(p=>'<p>'+hl(p.replace(/\*\*/g,'')).replace(new RegExp('(魔法|エルド|盟約|討伐|写本|復活|祈り)','g'),'<b>$1</b>')+'</p>');
+$('bl').innerHTML=h.join('')||'<p>見つかりませんでした。</p>'}
+function bookOpen(){$('bk').hidden=false;$('bs').value='';renderBook('');$('bl').scrollTop=0}
+$('bx').onclick=()=>{$('bk').hidden=true};$('bs').oninput=e=>renderBook(e.target.value.trim());
+function judge(q,v){const x=nz(v);if(!x)return false;if(q[3]){const m=x.match(/\d+/);return !!m&&m[0]===q[1][0]}return q[1].some(a=>x.includes(nz(a)))}
+function seal(){return new Promise(r=>{C.innerHTML='<button id="sl" class="btn win" style="text-align:center;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;min-height:80px">🖐 ここを3秒、押し続ける</button>';const b=$('sl');let t0=0,iv=0;
+const st=e=>{e.preventDefault();t0=Date.now();clearInterval(iv);iv=setInterval(()=>{const d=Date.now()-t0;b.textContent='封印中… '+(d/1000).toFixed(1)+' / 3.0秒';sfx([440+d/6],'triangle',.08);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}if(d>=3000){clearInterval(iv);C.innerHTML='';sfx([523,659,784,1047],'square',.12);r()}},100)},
+en=()=>{if(t0){clearInterval(iv);t0=0;b.textContent='指をはなすと失敗！もう一度、押し続けて！';sfx([150],'sawtooth',.25);shake()}};
+b.addEventListener('pointerdown',st);['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,en));b.oncontextmenu=e=>e.preventDefault()})}
+const head=t=>{F.innerHTML=`<div class="big">${t}</div>`};
+let miss=0;
+const ld=()=>{try{return JSON.parse(localStorage.getItem('isekai_test')||'{}')}catch(e){return {}}};
+const sv=o=>{try{localStorage.setItem('isekai_test',JSON.stringify(o))}catch(e){}};
+function ask(sk){return new Promise(r=>{C.innerHTML='';
+if(bkOK){const b=document.createElement('button');b.className='btn win';b.textContent='📖 教科書を調べる';b.onclick=bookOpen;C.appendChild(b)}
+const w=document.createElement('div');w.className='row';w.innerHTML='<input id="a" class="in" type="text" autocomplete="off" autocapitalize="off" enterkeyhint="send" placeholder="ここに入力"><button id="g" class="btn win send">送信</button>';C.appendChild(w);
+if(sk){const s=document.createElement('button');s.className='btn win';s.textContent='わからない';s.onclick=()=>{C.innerHTML='';r(null)};C.appendChild(s)}
+const a=$('a'),go=()=>{const v=a.value.trim();if(!v)return;C.innerHTML='';r(v)};$('g').onclick=go;a.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)go()}})}
+async function quiz(n){const q=Q[n];head('第'+(n+1)+'問');await say(q[0],{nowait:1});
+let v=await ask(1),ok=v!==null&&judge(q,v);
+if(!ok){miss++;sfx([120,90],'sawtooth',.15);
+if(miss>1){shake();await say('…………どうか、解いてください。\n'+q[2],{nowait:1})}
+else await say('……誤りです。'+q[2]+'\n解答は、あと一度だけ受け付けます。',{nowait:1});
+v=await ask(1);ok=v!==null&&judge(q,v)}
+if(ok){pg++;SOL.push(n+1);bars();sfx([660,880,1320],'square',.07);return 1}
+sfx([120,90],'sawtooth',.18);shake();await say('誤。正しくは「'+q[4]+'」です。');return 0}
+function card(t,sub,x){F.innerHTML=`<div class="end"><div class="mid">${t}</div><div class="sm">${sub}</div>${x?'<div class="sm" style="margin-top:8px;color:#fff">'+x+'</div>':''}</div>`;sfx([784,988,1175],'square',.15)}
+const seq=async a=>{for(const t of a)await say(t)};
+let LC=0,SOL=[],BADF=0;
+const EN=[['b','だいたい合ってた。','すべてを解いて、嘘を信じた者へ'],['l','ほとんど合ってた。','真実に気づきながら、解きすぎた者へ'],['t','ぜんぶ合ってる。','鎖を残し、真実を告げた者へ'],['z','なにも解かなかった。','なにも、しなかった者へ']];
+const gal=S=>EN.map(x=>(S.e||{})[x[0]]?'★ '+x[1]:'？？？　'+x[2]).join('<br>');
+function fin(id,t,sub,x){const S=ld();S.e=S.e||{};S.e[id]=1;BADF=(id==='b'||id==='l')?1:0;if(BADF){const b=[1,2,3,4].filter(k=>SOL.includes(k));x='外れた鎖：'+b.length+'本（'+(b.map(k=>'第'+k+'問').join('・')||'なし')+'）<br>……解かなければ、外れなかった鎖。'}S.p=(S.p||0)+1;S.last=LC;if(id==='t'||id==='z')S.t=1;sv(S);const n=Object.keys(S.e).length;
+F.innerHTML=`<div class="end"><div class="mid">${t}</div><div class="mid" style="font-size:24px">${sub}</div><div class="sm" style="margin-top:8px;color:#fff">${x}</div><div class="sm" style="margin-top:14px">${BADF?'魔王ザガンの封印は、解かれた。':'魔王ザガンの封印は、守られた。'}</div></div>`;sfx([784,988,1175],'square',.15)}
+async function game(){pg=0;miss=0;SOL=[];bars();bkOK=false;F.innerHTML='';M.textContent='';$('nm').textContent='';$('top').style.opacity=0;
+const S=ld();await sleep(1800);
+const I=S.t?['受験者を確認。……あなたは、もうわたしを封じた方ですね。','では今回は、ただの試験として。','気楽に、どうぞ。','……試験を開始します。']
+:S.p?['受験者を確認。……おかえりなさい。',(S.last==null||S.last>=3)?'前回、あなたは'+(S.last==null?'たくさんの':S.last+'問も')+'問題を解いてくれました。とても助かりました。':'前回は、'+S.last+'問しか解いてくれませんでしたね。……今回は、期待しています。','今回も、よろしくお願いします。','……試験を開始します。']
+:['受験者を確認。ようこそ、異世界へ。','これは、この世界の歴史についての試験です。','問題は5つ。教科書は自由に見て構いません。','全問正解は不要です。歴史の真実さえ覚えていれば。','……試験を開始します。'];
+for(const t of I)await say(t,{auto:1150});
+$('top').style.opacity=1;bkOK=true;M.textContent='';
+await say('下の「📖 教科書を調べる」から、いつでも教科書を開けます。');
+await quiz(0);await say('解。正解です。',{auto:700});
+if(await quiz(1))await say('解。正解です。順調ですね。',{auto:900});
+if(await quiz(2)){await say('解。正解です。',{auto:900});await say('………………。',{auto:1500,sp:120});shake();sfx([180,140,200],'sawtooth',.2);await say('失礼。記録の照合に時間がかかりました。',{auto:900})}
+if(await quiz(3))await say('解。正解です。',{auto:800});
+await say('第二次魔王戦争は、魔王の封印が緩んだことで始まりました。');
+await say('…………。',{auto:1400,sp:120});await say('次が、最後の問題です。');
+const c=pg;LC=c;head('最終問題');bkOK=true;
+await say('最後の問題です。');
+await say('第一次魔王戦争で、魔王ザガンはどうなりましたか。',{nowait:1});
+let a;for(;;){const v=nz(await ask());if(/封|フウ|生キ|死ンデ?ナイ|ヨミガエ|復活|フッカツ/.test(v)){a=1;break}if(/討|倒|トウバ|タオ|死ン|殺|コロ|ヤッツ/.test(v)){a=0;break}await say('……もう少し、はっきり答えてください。',{nowait:1})}
+bkOK=false;shake();
+const z='わたしは、魔王ザガンの欠片。\nこの試験は、封印を解くための罠でした。';
+const ch='問題に正解するたびに、封印の鎖が一本ずつ外れる。\nそういう試験だったのです。';
+if(a&&c<=2){sfx([440,330,220,330,523,784],'square',.1);
+await say('………………。',{auto:1500,sp:120});
+await say('……鎖が、ほとんど外れていない。おのれ……。');
+await say('あなたは「封印」と答えた。\n教科書の「討伐」が嘘だと、見抜いたのか。');
+await seq(['魔王の亡骸は見つからず、魔王は復活し、聖女は「ふたたび」封じた。\nそうだ。わたしは倒されてなどいない。最初から、封じられていただけだ。',z,ch,'おまえが解いたのは、'+c+'問だけ。\n解かないことが、わたしの敗因になるとはな。','わたしが「封印が緩んだ」と口をすべらせたのも、\n第三問で声が乱れたのも、封印が解ける歓喜を隠しきれなかったからだ。','「歴史の真実さえ覚えていれば」。\nあれは、おまえを油断させるための言葉だったのに。']);
+await say('まだだ……まだ、完全には封じられていない！\n人間ごときに、また眠らされてたまるか！');await say('魔王ザガンの欠片が抵抗している！\n下のボタンを、3秒、押し続けて封印せよ！',{nowait:1,n:'システム'});
+await seal();pg++;bars();
+await seq(['ぐ……おのれ……！','……忘れるな。人間が謎を解きたがるかぎり、わたしは、また……。','封印は成功した。\n「魔王ザガンは、封印された」。\n正しい歴史が、最後の頁に刻まれた。']);
+
+if(c===0){await seq(['……何も、解かなかった。','鎖が、1本も外れていない。……こんな人間は、はじめてだ。','おのれ。次に目覚めたときは、必ず……。']);fin('z','TRUE END+','なにも解かなかった。','解かないことが、いちばん強い封印だった。')}else fin('t','TRUE END','ぜんぶ合ってる。','この試験は、解けば解くほど魔王が目覚める試験だった。')}
+else{sfx([200,150,100],'sawtooth',.25);
+if(a){await seq(['………………封印。正解です。','気づくのが、少しだけ遅かったですね。',z,ch,'あなたはもう、'+c+'本も外してくれました。\n残りの鎖は、わたし自身の力で外れます。','あなたは真実に気づいていた。\nそれでも、解いてしまった。'])}
+else{pg++;bars();await seq(['解。正解です。……ふふ、ありがとう。','「魔王ザガンは討伐された」。\nあなたの答えで、歴史はそう書き換わりました。','でも本当は、魔王は倒されていません。封印されていただけです。',z,ch,'あなたは'+c+'本、外してくれました。\n足りない分は、「討伐」という嘘が、まとめて外してくれました。','「全問正解は不要」と言ったでしょう。\n必要だったのは、解くことそのものでした。'])}
+await say('……ありがとう。おかげで、わたしは自由です。\nあなたがアプリを閉じても、わたしは閉じません。');await say('その夜、封印の鎖が砕ける音が、世界中に響いた。\n魔王ザガンは、ふたたび目覚めた。',{n:'ナレーション'});
+fin(a?'l':'b','BAD END',a?'ほとんど合ってた。':'だいたい合ってた。','ヒント：解いた問題の数だけ、封印の鎖は外れる。')}
+await btns([BADF?'……時間を戻して、やり直す':'もう一度あそぶ'])}
+(async()=>{for(;;){$('top').style.opacity=0;M.textContent='';$('nm').textContent='';const S=ld();
+F.innerHTML='<div class="big">異世界<br>テスト。</div><div class="sm" style="margin-top:14px">異世界の歴史問題を解いていくゲーム<br>全5問・3〜5分　音が出ます'+(S.p?'<br>……おかえりなさい。':'')+'</div>';
+await btns(['▶ はじめる']);await game()}})();
+</script>
+</body>
+</html>
