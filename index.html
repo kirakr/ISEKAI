@@ -50,6 +50,14 @@ body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"DotG
 #mw.zg{background:#fff;color:#000;border-color:#000;box-shadow:0 0 0 3px #fff,0 0 0 5px #000}
 #mw.zg #nm{color:#444}
 #mw.zg #nx{color:#000}
+#gl{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:9;background:repeating-linear-gradient(0deg,#fff 0 3px,transparent 3px 11px);mix-blend-mode:difference}
+.zs{width:min(72vw,320px);height:auto;image-rendering:pixelated;animation:zin 1.1s steps(7)}
+@keyframes zin{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+.zs.sl{animation:zsl 2s steps(8) forwards}
+@keyframes zsl{to{opacity:.25;transform:scale(.45)}}
+.brk #mw{transform:rotate(-1.5deg) translateY(6px);clip-path:polygon(0 0,36% 2%,40% 0,100% 3%,98% 100%,62% 97%,58% 100%,2% 98%)}
+.brk #st{transform:rotate(1deg);clip-path:polygon(0 0,100% 6%,97% 100%,0 92%)}
+#rw{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:12px;z-index:9;display:none;font-size:18px;color:#fff;background:#000;padding:2px 8px;border:2px solid #fff;animation:bl 1s steps(2) infinite}
 #bk{position:fixed;inset:0;z-index:5;background:#000;max-width:520px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
 #bk[hidden]{display:none}
 #bl{flex:1;overflow-y:auto;font-size:20px;line-height:1.9}
@@ -61,7 +69,7 @@ body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"DotG
 <body>
 <div id="app">
 <div id="top" style="opacity:0"><div class="win" id="st">解いた問題　<b id="lv">0</b> / 5</div><button class="win" id="sn">音 ON</button></div>
-<div id="field"></div>
+<div id="field"></div><div id="gl"></div><div id="rw">◀◀ REW</div>
 <div id="cmd"></div><button id="bookDock" class="btn win book-btn" onclick="bookOpen()">📖 教科書を調べる</button>
 <div class="win" id="mw"><div id="nm"></div><div id="msg"></div><span id="nx">▼</span></div>
 <div id="bk" hidden><div class="win" style="display:flex;justify-content:space-between;align-items:center"><span>📖 聖暦史（写本）</span><button class="btn win" id="bx" style="width:auto;min-height:0;padding:6px 12px;font-size:18px">閉じる</button></div><input id="bs" class="in" type="search" placeholder="ことばで検索（例：盟約）" autocomplete="off"><div id="bl" class="win"></div></div>
@@ -89,7 +97,7 @@ const nz=s=>s.normalize('NFKC').replace(/[\s。、．，・「」『』]/g,'').r
 let AC,snd=true,skip=false,typing=false,tap=null,pg=0,bkOK=false;
 function sfx(fs,ty='square',d=.1){if(!snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();fs.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*d;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.05,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)})}catch(e){}}
 const blip=()=>sfx([700],'square',.03);
-const bars=()=>{$('lv').textContent=pg};
+const bars=()=>{const e=$('lv');if(e)e.textContent=pg};
 function shake(){}
 $('sn').onclick=()=>{snd=!snd;$('sn').textContent=snd?'音 ON':'音 OFF'};
 $('mw').onclick=()=>{if(typing)skip=true;else if(tap){const f=tap;tap=null;$('nx').style.visibility='hidden';f()}};
@@ -109,7 +117,7 @@ if(t.length>26){
 }
 $('nm').textContent=opt.n===undefined?'叡智の声':opt.n;M.textContent='';skip=false;typing=true;
 for(let i=1;i<=t.length;i++){if(skip){M.textContent=t;break}M.textContent=t.slice(0,i);if(i%2&&!/[\s。、…\n]/.test(t[i-1]))blip();await sleep(opt.sp||34)}
-M.textContent=t;typing=false;
+M.textContent=t;typing=false;snap($('nm').textContent,t);
 $('nx').style.visibility='visible';await new Promise(r=>tap=r)}
 function btns(a){return new Promise(r=>{C.innerHTML='';a.forEach((t,i)=>{const b=document.createElement('button');b.className='btn win';b.textContent=t;b.onclick=()=>{sfx([900,1200],'square',.05);C.innerHTML='';r(i)};C.appendChild(b)})})}
 function shareBtn(){return new Promise(r=>{C.innerHTML='';const b=document.createElement('button');b.className='btn win';b.textContent='Xにシェアする';b.onclick=()=>{sfx([900,1200],'square',.05);const text='『異世界テスト。』TRUE ENDに到達！\n最後に待っていたのは予想外の真実。\nあなたはこの結末にたどり着ける？\n#異世界テスト';const url='https://x.com/intent/tweet?text='+encodeURIComponent(text);window.open(url,'_blank','noopener,noreferrer');C.innerHTML='';r()};C.appendChild(b)})}
@@ -119,10 +127,6 @@ $('bl').innerHTML=h.join('')||'<p>見つかりませんでした。</p>'}
 function bookOpen(){$('bk').hidden=false;$('bs').value='';renderBook('');$('bl').scrollTop=0}
 $('bx').onclick=()=>{$('bk').hidden=true};$('bs').oninput=e=>renderBook(e.target.value.trim());
 function judge(q,v){const x=nz(v);if(!x)return false;if(q[3]){const m=x.match(/\d+/);return !!m&&m[0]===q[1][0]}return q[1].some(a=>x.includes(nz(a)))}
-function seal(){return new Promise(r=>{C.innerHTML='<button id="sl" class="btn win" style="text-align:center;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;min-height:80px">🖐 ここを3秒、押し続ける</button>';const b=$('sl');let t0=0,iv=0;
-const st=e=>{e.preventDefault();t0=Date.now();clearInterval(iv);iv=setInterval(()=>{const d=Date.now()-t0;b.textContent='封印中… '+(d/1000).toFixed(1)+' / 3.0秒';sfx([440+d/6],'triangle',.08);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}if(d>=3000){clearInterval(iv);C.innerHTML='';sfx([523,659,784,1047],'square',.12);r()}},100)},
-en=()=>{if(t0){clearInterval(iv);t0=0;b.textContent='指をはなすと失敗！もう一度、押し続けて！';sfx([150],'sawtooth',.25);shake()}};
-b.addEventListener('pointerdown',st);['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,en));b.oncontextmenu=e=>e.preventDefault()})}
 const head=(t,q='')=>{F.innerHTML=`<div class="big">${t}</div>${q?'<div class="question">'+q+'</div>':''}`};
 function clearDialogue(){M.textContent='';$('nm').textContent='';$('nx').style.visibility='hidden'}
 function ensureAnswerRow(){
@@ -160,26 +164,42 @@ b.onclick=()=>{a.disabled=true;g.disabled=true;b.disabled=true;r(null)};
 const go=()=>{const v=a.value.trim();if(!v)return;a.disabled=true;g.disabled=true;b.disabled=true;r(v)};g.onclick=go;a.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)go()};
 })}
 async function quiz(n){const q=Q[n];await showQuestion('第'+(n+1)+'問',q[0]);
-let v=await ask(1),ok=v!==null&&judge(q,v);
+let v=await ask(1),ok=v!==null&&judge(q,v);snapA(v);
 if(v===null||!ok){miss++;sfx([120,90],'sawtooth',.15);
 if(v===null)await say('……分からない、ですね。'+q[2]+'\n解答は、あと一度だけ受け付けます。',{nowait:1});
 else if(miss>1){shake();await say('…………どうか、解いてください。\n'+q[2],{nowait:1})}
 else await say('……誤りです。'+q[2]+'\n解答は、あと一度だけ受け付けます。',{nowait:1});
-v=await ask(1);ok=v!==null&&judge(q,v)}
-if(ok){pg++;SOL.push(n+1);bars();sfx([660,880,1320],'square',.07);return 1}
+v=await ask(1);ok=v!==null&&judge(q,v);snapA(v)}
+if(ok){pg++;SOL.push(n+1);ANS.push(v);bars();sfx([660,880,1320],'square',.07);return 1}
 sfx([120,90],'sawtooth',.18);shake();await say('誤。正しくは「'+q[4]+'」です。');return 0}
 function card(t,sub,x){F.innerHTML=`<div class="end"><div class="mid">${t}</div><div class="sm">${sub}</div>${x?'<div class="sm" style="margin-top:8px;color:#fff">'+x+'</div>':''}</div>`;sfx([784,988,1175],'square',.15)}
 const seq=async a=>{for(const t of a)await say(t)};
-let LC=0,SOL=[],BADF=0;
+let LC=0,SOL=[],ANS=[],REC=[],BADF=0;
 const EN=[['b','だいたい合ってた。','すべてを解いて、嘘を信じた者へ'],['l','ほとんど合ってた。','真実に気づきながら、解きすぎた者へ'],['t','ぜんぶ合ってる。','鎖を残し、真実を告げた者へ'],['z','なにも解かなかった。','なにも、しなかった者へ']];
 const gal=S=>EN.map(x=>(S.e||{})[x[0]]?'★ '+x[1]:'？？？　'+x[2]).join('<br>');
 function fin(id,t,sub,x){const S=ld();S.e=S.e||{};S.e[id]=1;BADF=(id==='b'||id==='l')?1:0;if(BADF){const b=[1,2,3,4].filter(k=>SOL.includes(k));x='外れた鎖：'+b.length+'本（'+(b.map(k=>'第'+k+'問').join('・')||'なし')+'）<br>……解かなければ、外れなかった鎖。'}S.p=(S.p||0)+1;S.last=LC;if(id==='t'||id==='z')S.t=1;sv(S);const n=Object.keys(S.e).length;
 F.innerHTML=`<div class="end"><div class="big">${t.startsWith('TRUE')?'TRUE END':'BAD END'}</div></div>`;sfx([784,988,1175],'square',.15)}
+const ZG=["..............####....................................................................................####..............", "...........########..................................................................................########...........", "...........####oo##..................................................................................##ooo###...........", ".........##ooooo##....................................................................................###oooo###........", "......#####ooo###..........................................##..........................................###ooo#####......", "......###ooooo##..........................................###...........................................##ooooo###......", ".....##ooooo###...........................................##o#...........................................###ooooo###....", "....###oooo###..........................##................##o##...............###.........................###oooo###....", "....###oooo##..........................####.............##oooo##.............#####.........................##ooooo###...", "...##oooooo##.........................##oo##............##oooo##............##oo##.........................##oooooo##...", "...##oooooo##.........................##oo###...........##oooo##............##oo##..........................#oooooo##...", "...##oooo##...........................##ooo##...........##oooo##...........##ooo##...........................##oooo##...", ".##oooooo##............................##ooo##.........##oooooo##..........##oo##............................##oooooo##.", ".##ooooo###............................##oooo##........##oooooo##........##oooo##.............................##ooooo##.", ".##ooooo###............................##ooooo##......###oo##oo###......##ooooo##............................###ooooo##.", ".##oooooo##............................##ooooo##.....###ooo##oooo##.....##ooooo##............................##oooooo##.", "###ooooooo##....................###....##ooooo##.....##oo###o##oo##.....##ooooo##.....##....................###oooooo###", "##ooooooooo##..................#oo###..##oooooo##..##oooo##oo###ooo##..##oooooo##...##oo##.................##ooooooooo##", "##ooooooooo##.................##oo####.##o##oooo#####ooo##o##o##ooo#####oooo##o##.####oo##.................##ooooooooo##", "##ooooooooo###.................###oo#####o##ooooo###ooo#######o##ooo####oooo##o#####oo###................####ooooooooo##", "###oooooooooo####...............###ooo###o##oooooooooo##o##oo##o##oooooooooo##o###ooo###...............###ooooooooooo###", ".##oooooooooo####.................##oo###o##oooooooooo####oooo####oooooooooo##o###ooo##...............####ooooooooooo##.", ".##ooooooooooooo###########.......###o######oooooooooo####oooo####oooooooooo######oo##.......##########oooooooooooooo##.", ".##oooooooooooooo#############.....##oo#####oooooooooo#####oo#####oooooooooo#####oo##.....#############oooooooooooooo##.", "..###oooooooooooooooooooooo####....##oooo###oooooooooo##oo####oo##oooooooooo###oooo##.....####ooooooooooooooooooooo###..", "...##ooooooooooooooooooooooooo####.###ooo###oooooo##ooo###o##oo##ooo###ooooo###ooo###.####ooooooooooooooooooooooooo##...", "...##ooooooooooooooooooooooooooo###o##ooo###oo#######ooo###oo###ooo#######oo###ooo##o##o##ooooooooooooooooooooooooo##...", "....###oooooooooooooooooooooooooo###o##ooooooo#######oooo###o##oooo##o####ooooooo##oo##ooooooooooooooooooooooooooo###...", "....###oooooooooooooooooooooooooooo##o##oooo###########oooo##ooooo##########oooo##o##oooooooooooooooooooooooooooo###....", ".....#####ooooooooooooooooo##oooooo######ooo####oooo#####oo##oo#####oooo#####oo######oooooo##ooooooooooooooooo#####.....", "......####ooooooooooooooooo##ooooooo##o##ooo####ooooo####oooooo####oooooo####oo##o##ooooooo##ooooooooooooooooo####......", ".........###oooooooooooo###..##ooooo###o######oo#####oo####oo####ooo####ooo#########ooooo##..##ooooooooooooo###.........", "..........##oooooooooooo###..###oooooo##o####oo######ooo#########oo######oo####o##oooooo###..###oooooooooooo##..........", "............####ooooo####......##ooooo##o##ooo########oooo####oooo########ooo#####oooooo##.....####ooooo####............", "..............######o##....##..###ooo#####o##############o####oo#############o#####ooo###..##...###o######..............", "................######...#####..##ooo####oo#####oo###o####o##o####o####oo#####o####ooo##..#####...######................", "...................##....##oo##..#######oo####ooo###oooo##oooo###ooo###ooo#####o#######..##oo###...##...................", ".......................##oooooo#..####ooo####oooo##ooooo##oooo##ooooo##ooooo###oooo###..##ooooo##.......................", "........................#####oo###o##ooo####ooooo##oooooo##oo##oooooo##ooooo####ooo##..##oo######.......................", ".........................####ooo####ooo#####oooo##oooooooo##o#oooooooo##oooo#####ooo####ooo####.........................", "............................###o####oo#####ooooo#ooooooooo####ooooooooo##oooo#####oo####o###............................", ".............................##ooooooo#####ooooo#oooooooooo##oooooooooo##oooo######oooooo##.............................", "..............................###ooo##o##ooooooo#oooooooooooooooooooooo##oooooo##o##oooo##..............................", ".............................###oooo##o##ooooooo#oooooooooooooooooooooo##oooooo##o##oooo###.............................", "............................###oooo##o##oo##oo##oooooooooooooooooooooooo##oo##oo#####oooo###............................", "...........................##ooooo#####ooo##oo##oooooooooooooooooooooooo##oo##ooo######oooo##...........................", "...........................##oooo#####oooo##oo##oooooooooooooooooooooooo##oo##oooo#####oooo##...........................", ".........................##ooooo#####oooo###oo##oooooooooooooooooooooooo##oo####oooo####ooooo##.........................", ".....................######oo#######ooooo###o######oooooooooooooooooo######o####oooo########oo#####.....................", "....................#####o#########oooooo###o#########oooooooooooo#########o####ooooo#######ooo#####....................", "...................##ooooo###..###ooooooo###o####oo####ooooooooooo###ooo###o####oooooo###..####oooo##...................", "....................#######...###oooooooo###o##o##oooo###oooooo###oooo#####o####oooooooo##....######....................", ".....................#####..###ooooooo#oo###oo##o##ooooo##oooo##ooooo##o##oo####o#ooooooo###..#####.....................", "...........................###oooooo###oo####o##oo########oooo########oo##o#####o###oooooo###...........................", "...........................##oooooo####ooo###oo##oo######oooooo######oo##oo###ooo####oooooo###..........................", ".........................##ooooo#######ooo####o##oooooooooooooooooooooo##o####ooo#######ooooo###........................", "........................#ooooooo#######ooo####oo##oooooooooooooooooooo##oo####ooo##.####ooooooo##.......................", ".......................##ooooo######o##ooo####ooo##ooooooooooooooooooo#ooo####ooo##..#####ooooo##.......................", ".....................###ooo####o####o##ooo##oo##oo##oooooooooooooooo##oo###o##ooo##.#########oooo##.....................", "...................####oooo######oo####ooo###o##oo##oooooooooooooooo##oo##o###ooo##.#oo######oooo####...................", "...................##ooo###..###oo#..##oooo##oo##o##oooooooooooooooo##o##oo##oooo##..#oo###..###ooo##...................", "..................#########..##ooo#..##o#ooo#oo##oo##oooooooooooooo##oo##oo##oo#o##..#ooo##...#####o##..................", "..................##o###.....##ooo#..##o#oooo##.#oo##oooooooooooooo##oo####oooo####..#ooo##.....###oo##.................", "...................##.......##oo##....###oooo##.##o##o###oooooo###o##o##.##oooo###....##oo###......##...................", "...................##......##ooo##.....##oooo##..######oo#oooo##o####o#..##oooo##.....##ooo##......##...................", "...........................##ooo##.....##oooo##..#######o######o#####o#..##oooo##.....##ooo##...........................", "...........................##ooo##......##ooo##...#######o####o########..##ooo##......##ooo##...........................", "...........................##oo##........##oo##...##o####oooooo####o##...##oo##........##oo##...........................", "...........................##oo#.........##oo##...##oo##o######o##oo##...##oo##.........#oo##...........................", "...........................##oo#.........##ooo##...##oo#######o##oo##...##ooo##.........#oo##...........................", "...........................##oo##........##ooo##....#oo###ooooo##oo##...##ooo##........##oo##...........................", "............................##oo##........##oo##.....##oo##oo##oo##.....##oo##........##oo##............................", ".............................##o##........##oo##.....###oo####oo###.....##oo##........##o##.............................", "..............................##o##.......##oooo#.....##ooo##ooo##.....##ooo##.......##oo#..............................", "..............................###o##.......##ooo#......##oooooo###.....##oo##.......######..............................", "...............................#####........##oo##......##oooo###.....##oo##........#####...............................", ".................................###.........##oo##......#oooo#......##oo##..........##.................................", "..................................#...........##oo#.......##o#.......##o##..............................................", "...............................................##o##......####......##o##...............................................", "................................................##o##......##.......#o##................................................", ".................................................##..................##................................................."];
+let zt=0;
+function drawZ(on,id){const c=$(id||'zc');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,120,81);ZG.forEach((l,y)=>{for(let i=0;i<120;i++){const ch=l[i];if(ch==='#')x.fillStyle='#fff';else if(ch==='o')x.fillStyle=on?'#3a3a3a':'#505050';else continue;x.fillRect(i,y,1,1)}})}
+function showZ(na){F.innerHTML='<canvas id="zc" class="zs" width="120" height="81"></canvas>';if(na)$('zc').style.animation='none';drawZ(1);clearInterval(zt);let on=1;zt=setInterval(()=>{if(!$('zc')){clearInterval(zt);return}on=!on;drawZ(on)},650)}
+function breakUI(){document.title='魔王ザガン。'}
+function repairUI(){$('app').classList.remove('brk');$('st').innerHTML='解いた問題　<b id="lv">'+pg+'</b> / 5';document.title='異世界テスト。';sfx([523,659,784],'triangle',.1)}
+const AL=()=>ANS.length?['貴様が口にした「'+ANS.join('」「')+'」。\nその一つ一つが、鎖を断ち切ったのだ。']:[];
+function snap(nm,msg){REC.push({f:F.innerHTML,z:!!$('zc'),nm,msg,w:$('mw').classList.contains('zg'),p:pg,t:$('top').style.opacity})}
+const snapA=v=>snap('あなた','「'+(v===null?'わからない':v)+'」');
+async function rewind(run){await sleep(1500);C.innerHTML='';$('mw').classList.remove('zg');
+const P=run===0?['……聞こえますか。わたしは、聖女ミレイユ。','魔王の封印を解いたのは、あなたの「解答」でした。','問題に正解するたび、鎖は外れてしまう。\n……解かなければ、外れません。','祈りで、時を巻き戻します。\n……お願い、今度こそ。']:['……また、解かれてしまいました。','もう一度だけ、祈ります。\n鎖は、解かなければ外れません。'];
+for(const t of P)await say(t,{n:'？？？'});
+C.innerHTML='';$('nx').style.visibility='hidden';$('rw').style.display='block';
+const N=REC.length,st=Math.max(1,Math.ceil(N/70));let k=0;
+for(let i=N-1;i>=0;i-=st,k++){const r=REC[i];if(r.z)showZ(1);else F.innerHTML=r.f;M.textContent=r.msg;$('nm').textContent=r.nm;$('mw').classList.toggle('zg',r.w);$('top').style.opacity=r.t;const e=$('lv');if(e)e.textContent=r.p;$('gl').style.opacity=k%2?0:.18;sfx([260+i*4],'sawtooth',.03);await sleep(Math.max(20,95-k*3))}
+$('gl').style.opacity=0;$('rw').style.display='none';await sleep(500);repairUI();F.innerHTML='';M.textContent='';$('nm').textContent='';$('top').style.opacity=0}
 async function unmask(){F.innerHTML='';const mw=$('mw'),G='■▲◆▼●※＃░▒',r=()=>G[Math.floor(Math.random()*G.length)];
 C.innerHTML='';$('bookDock').classList.remove('visible');$('nx').style.visibility='hidden';sfx([110,80,55],'sawtooth',.3);
-for(let i=0;i<16;i++){mw.classList.toggle('zg',i%2===0);$('nm').textContent=i<9?'叡'+r()+'の'+r():r()+r()+r()+r();M.textContent=Array.from({length:18},()=>Math.random()<.5?r():'　').join('');if(i%3===0)sfx([150+Math.random()*700],'square',.05);await sleep(75)}
-mw.classList.add('zg');$('nm').textContent='魔王ザガン';M.textContent='';sfx([55,45],'sawtooth',.5);await sleep(700)}
-async function game(){pg=0;miss=0;SOL=[];$('mw').classList.remove('zg');bars();bkOK=false;$('bookDock').classList.remove('visible');F.innerHTML='';M.textContent='';$('nm').textContent='';$('top').style.opacity=0;
+for(let i=0;i<16;i++){mw.classList.toggle('zg',i%2===0);$('gl').style.opacity=i%2?0:.55;$('nm').textContent=i<9?'叡'+r()+'の'+r():r()+r()+r()+r();M.textContent=Array.from({length:18},()=>Math.random()<.5?r():'　').join('');if(i%3===0)sfx([150+Math.random()*700],'square',.05);await sleep(75)}
+$('gl').style.opacity=0;mw.classList.add('zg');$('nm').textContent='魔王ザガン';M.textContent='';sfx([55,45],'sawtooth',.5);await sleep(700)}
+async function game(run){pg=0;miss=0;SOL=[];ANS=[];REC=[];$('mw').classList.remove('zg');bars();bkOK=false;$('bookDock').classList.remove('visible');F.innerHTML='';M.textContent='';$('nm').textContent='';$('top').style.opacity=0;
 const S=ld();await sleep(1800);
 const I=0?['受験者を確認。……あなたは、もうわたしを封じた方ですね。','では今回は、ただの試験として。','気楽に、どうぞ。','……試験を開始します。']
 :0?['受験者を確認。……おかえりなさい。',(S.last==null||S.last>=3)?'前回、あなたは'+(S.last==null?'たくさんの':S.last+'問も')+'問題を解いてくれました。とても助かりました。':'前回は、'+S.last+'問しか解いてくれませんでしたね。……今回は、期待しています。','今回も、よろしくお願いします。','……試験を開始します。']
@@ -195,31 +215,27 @@ if(await quiz(3))await say('解。正解です。',{auto:800});
 await say('第二次魔王戦争は、魔王の封印が緩んだことで始まりました。');
 await say('…………。',{auto:1400,sp:120});await say('次が、最後の問題です。');
 const c=pg;LC=c;await showQuestion('最終問題','第一次魔王戦争で、魔王ザガンはどうなりましたか。');bkOK=true;$('bookDock').classList.add('visible');
-let a;for(;;){const raw=await ask(1);if(raw===null){a=0;break}const v=nz(raw);if(/封|フウ|生キ|死ンデ?ナイ|ヨミガエ|復活|フッカツ/.test(v)){a=1;break}if(/討|倒|トウバ|タオ|死ン|殺|コロ|ヤッツ/.test(v)){a=0;break}await say('……もう少し、はっきり答えてください。',{nowait:1})}
+let a;for(;;){const raw=await ask(1);snapA(raw);if(raw===null){await say('……答えない、のですか。\n最後の問題だけは、答えてもらいます。');continue}const v=nz(raw);if(/封|フウ|生キ|死ンデ?ナイ|ヨミガエ|復活|フッカツ/.test(v)){a=1;break}if(/討|倒|トウバ|タオ|死ン|殺|コロ|ヤッツ/.test(v)){a=0;break}await say('……もう少し、はっきり答えてください。',{nowait:1})}
 bkOK=false;$('bookDock').classList.remove('visible');shake();
 const zq=async a=>{for(const t of a){const parts=t.split(/\n+/).flatMap(line=>line.trim().split(/(?<=[。！!？?])/).map(x=>x.trim()).filter(Boolean));for(const p of parts)await say(p,{n:'魔王ザガン'})}};
 const z='我が名は、魔王ザガン。\n肉体を封じられても、魂までは消えなかった。\nこの試験は、貴様に封印を解かせるための罠だ。';
 const ch='問題に正解するたびに、封印の鎖は一本ずつ外れる。\nそういう試験だったのだ。';
 if(a&&c<=2){sfx([440,330,220,330,523,784],'square',.1);
 await say('………………。',{auto:1500,sp:120});
-await unmask();await zq(['……鎖が、ほとんど外れていない。おのれ……！','「封印」と答えたか。\n教科書の「討伐」が嘘だと、見抜いたというのか。','そうだ。亡骸は見つからず、我は復活し、聖女は「ふたたび」封じた。\n我は倒されてなどいない。最初から、封じられていただけだ。',z,ch,'貴様が解いたのは、'+c+'問だけ。\n解かぬことが、我の敗因になるとはな。','「封印が緩んだ」と口をすべらせたのも、'+(SOL.includes(3)?'第三問で声が乱れたのも、':'')+'\n封印が解ける歓喜を隠しきれなかったからだ。','「歴史の真実さえ覚えていれば」。\nあれは、貴様を油断させるための言葉だったというのに。','まだだ……まだ、完全には封じられていない！\n人間ごときに、また眠らされてたまるか！']);
-await say('魔王ザガンの思念体が抵抗している！\n下のボタンを、3秒、押し続けて封印せよ！',{nowait:1,n:'システム'});
-await seal();pg++;bars();
+await unmask();breakUI();showZ();await zq([(c===0?'……鎖が、一本も外れていない。おのれ……！':'……鎖が、ほとんど外れていない。おのれ……！'),'「封印」と答えたか。\n教科書の「討伐」が嘘だと、見抜いたというのか。','そうだ。亡骸は見つからず、我は復活し、聖女は「ふたたび」封じた。\n我は倒されてなどいない。最初から、封じられていただけだ。',z,ch,(c===0?'貴様は、ただの一問も解かなかった。':'貴様が解いたのは、'+c+'問だけ。')+'\n解かぬことが、我の敗因になるとはな。','「封印が緩んだ」と口をすべらせたのも、'+(SOL.includes(3)?'第三問で声が乱れたのも、':'')+'\n封印が解ける歓喜を隠しきれなかったからだ。','「歴史の真実さえ覚えていれば」。\nあれは、貴様を油断させるための言葉だったというのに。','やめろ……！ また、あの暗闇に戻るのは嫌だ……！\n人間ごときに、我が……！']);
+repairUI();if($('zc'))$('zc').classList.add('sl');pg++;bars();
 await say('おのれ。次に目覚めたときは、必ず……。',{n:'魔王ザガン'});
 await say('封印は成功した。\n「魔王ザガンは、封印された」。\n正しい歴史が、最後の頁に刻まれた。',{n:'ナレーション'});
 if(c===0)fin('z','TRUE END+','なにも解かなかった。','解かないことが、いちばん強い封印だった。');else fin('t','TRUE END','ぜんぶ合ってる。','この試験は、解けば解くほど魔王が目覚める試験だった。')}
 else{sfx([200,150,100],'sawtooth',.25);
-if(a){await say('………………封印。正解です。');await unmask();await zq(['……くく。気づいたか。だが、遅かったな。',z,ch,'貴様はすでに'+c+'本も外した。\n残りの鎖は、我の力だけで砕ける。','真実に気づいていながら、それでも解くとは。\n愚かで、実にありがたい。'])}
-else{pg++;bars();await say('解。正解です。\n「魔王ザガンは討伐された」。そう記されました。');await unmask();await zq(['……くくく。はははは！','魔王は倒されてなどいない。\n第一次魔王戦争で、封じられていただけだ。',z,ch,'貴様は'+c+'本、外してくれた。\n足りない分は、「討伐」という嘘がまとめて外した。','「全問正解は不要」と言ったな。\n必要だったのは、貴様が解くことそのものだ。'])}
+if(a){await say('………………封印。正解です。');await unmask();breakUI();showZ();await zq(['……くく。気づいたか。だが、遅かったな。',z,ch,...AL(),'貴様はすでに'+c+'本も外した。\n残りの鎖は、我の力だけで砕ける。','真実に気づいていながら、それでも解くとは。\n愚かで、実にありがたい。'])}
+else{pg++;bars();await say('解。正解です。\n「魔王ザガンは討伐された」。そう記されました。');await unmask();breakUI();showZ();await zq(['……くくく。はははは！','魔王は倒されてなどいない。\n第一次魔王戦争で、封じられていただけだ。',z,ch,...AL(),(c===0?'貴様は、一本も外さなかった。\n……だが「討伐」という嘘が、すべての鎖をまとめて外した。':'貴様は'+c+'本、外してくれた。\n'+(c>=4?'残る最後の一本は、「討伐」という嘘が外した。':'足りない分は、「討伐」という嘘がまとめて外した。')),'「全問正解は不要」と言ったな。\n必要だったのは、貴様が解くことそのものだ。'])}
 await zq(['礼を言うぞ、人間。……これで、我は自由だ。']);
 await say('その夜、封印の鎖が砕ける音が、世界中に響いた。\n魔王ザガンは、ふたたび目覚めた。',{n:'ナレーション'});
 fin(a?'l':'b','BAD END',a?'ほとんど合ってた。':'だいたい合ってた。','')}
-if(BADF)await btns(['解きなおす']);else await shareBtn()}
+if(BADF){await rewind(run);return 0}await shareBtn();return 1}
 
-(async()=>{for(;;){$('top').style.opacity=0;M.textContent='';$('mw').classList.remove('zg');$('nm').textContent='';const S=ld();
-F.innerHTML='<div class="titleLine">異世界テスト。</div><div class="sm" style="margin-top:14px">異世界の歴史問題を解いていくゲーム<br>全5問・3〜5分　音が出ます</div>';
-await btns(['▶ はじめる']);await game()}})();
+(async()=>{let run=0;for(;;){if(run===0){$('top').style.opacity=0;M.textContent='';$('mw').classList.remove('zg');$('nm').textContent='';F.innerHTML='<div class="titleLine">異世界テスト。</div><div class="sm" style="margin-top:14px">異世界の歴史問題を解いていくゲーム<br>全5問・3〜5分　音が出ます</div>';await btns(['▶ はじめる'])}run=(await game(run))?0:run+1}})();
 </script>
 </body>
 </html>
-
